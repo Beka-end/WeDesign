@@ -587,6 +587,7 @@
     $('doneUrl').textContent = url;
     $('doneUrl').href = url;
     $('btnOpenSite').href = url;
+    $('btnDownload').href = '/api/download?code=' + encodeURIComponent(data.code);
     $('doneNote').innerHTML =
       'Нужно поправить текст или добавить фотографии — ' +
       (support && support.whatsapp

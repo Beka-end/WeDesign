@@ -210,6 +210,9 @@ p{margin:0 0 1em}
 .live-url:hover{text-decoration:underline}
 .live-act{display:flex;gap:10px;flex-wrap:wrap}
 
+.filebox{background:var(--soft);border-radius:16px;padding:18px 20px;margin:14px 0 12px;display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+.filebox b{font-size:15.5px}
+
 /* ——— мой заказ ——— */
 .check{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
 
