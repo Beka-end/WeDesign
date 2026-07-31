@@ -17,6 +17,9 @@
   --tx:var(--ink); --teal:var(--ac); --indigo:var(--ac); --ochre:var(--amber);
 }
 *{box-sizing:border-box}
+/* Атрибут hidden должен скрывать элемент всегда — даже если у класса
+   задан display. Иначе окна и блоки не закрываются. */
+[hidden]{display:none!important}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.6 'Manrope',system-ui,-apple-system,sans-serif;letter-spacing:-.014em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{display:block;max-width:100%}
@@ -234,6 +237,7 @@ details p{color:var(--mu);margin:0;padding:0 22px 20px;max-width:64ch;font-size:
 @media(max-width:640px){.help span{display:none}.help{padding:15px;border-radius:50%}}
 
 /* ——— окно согласия ——— */
+.gate:not([hidden]){display:grid}
 .gate{position:fixed;inset:0;z-index:200;background:#13161BA8;backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;overflow-y:auto}
 .gate-card{background:var(--card);border-radius:24px;box-shadow:var(--sh-3);max-width:560px;width:100%;animation:gateIn .3s cubic-bezier(.2,.7,.3,1)}
 @keyframes gateIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
