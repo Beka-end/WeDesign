@@ -128,7 +128,7 @@ async function uniqueDNA() {
 
 /* ------------------------------ handler ----------------------------- */
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== 'POST') return L.fail(res, 405, 'Только POST');
 
   const ip = L.clientIp(req);
@@ -236,3 +236,5 @@ module.exports = async (req, res) => {
     left: Math.max(0, perIpDay.max - perIpDay.used),
   });
 };
+
+module.exports = L.wrap(handler);

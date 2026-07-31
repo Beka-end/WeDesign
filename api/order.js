@@ -3,7 +3,7 @@
 
 const L = require('./_lib');
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== 'POST') return L.fail(res, 405, 'Только POST');
 
   const ip = L.clientIp(req);
@@ -81,3 +81,5 @@ function publicOrder(o) {
     kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
   };
 }
+
+module.exports = L.wrap(handler);

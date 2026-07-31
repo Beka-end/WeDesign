@@ -11,13 +11,25 @@
   var filter = 'claimed';
   var kaspiUrl = '';
 
+  function parse(res, text) {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      if (res.status === 404)
+        throw new Error('Сервер не нашёл /api/admin (404). Папка api лежит не в корне репозитория.');
+      if (res.status >= 500)
+        throw new Error('Функция упала (ошибка ' + res.status + '). Причина — в логах Vercel.');
+      throw new Error('Сервер вернул страницу вместо ответа (код ' + res.status + ').');
+    }
+  }
+
   async function call(payload) {
     var res = await fetch('/api/admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
       body: JSON.stringify(payload)
     });
-    var data = await res.json().catch(function () { return { error: 'Сервер ответил непонятно' }; });
+    var data = parse(res, await res.text());
     if (res.status === 401) { logout(); throw new Error('Сессия закончилась, войдите заново'); }
     if (!res.ok || !data.ok) throw new Error(data.error || 'Не получилось');
     return data;
@@ -43,7 +55,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'login', password: $('pw').value })
       });
-      var data = await res.json();
+      var data = parse(res, await res.text());
       if (!data.ok) throw new Error(data.error);
       token = data.token;
       sessionStorage.setItem(KEY, token);

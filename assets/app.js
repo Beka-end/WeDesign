@@ -162,13 +162,33 @@
 
   /* ═══════════ вызов API ═══════════ */
 
+  // Разбор ответа сервера. Если пришёл не JSON, а страница с ошибкой —
+  // говорим об этом прямо, вместе с кодом. Так проще чинить.
+  function parse(res, text) {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      if (res.status === 404)
+        throw new Error('Сервер не нашёл /api (ошибка 404). Похоже, папка api лежит не в корне репозитория.');
+      if (res.status >= 500)
+        throw new Error('Функция на сервере упала (ошибка ' + res.status + '). Точная причина — в логах Vercel.');
+      throw new Error('Сервер вернул страницу вместо ответа (код ' + res.status + ').');
+    }
+  }
+
   async function api(path, payload) {
-    var res = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    var data = await res.json().catch(function () { return { error: 'Сервер ответил непонятно' }; });
+    var res, text;
+    try {
+      res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      text = await res.text();
+    } catch (e) {
+      throw new Error('Не удалось связаться с сервером. Проверьте интернет и обновите страницу.');
+    }
+    var data = parse(res, text);
     if (!res.ok || !data.ok) throw new Error(data.error || 'Не получилось');
     return data;
   }
@@ -324,7 +344,7 @@
     if (!code) return;
     try {
       var res = await fetch('/api/status?code=' + encodeURIComponent(code));
-      var data = await res.json();
+      var data = parse(res, await res.text());
       if (!data.ok) throw new Error(data.error);
       var text = LABEL[data.status] || data.status;
       if (data.publicUrl) text += ' → ' + location.origin + data.publicUrl;

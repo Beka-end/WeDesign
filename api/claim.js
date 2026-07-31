@@ -3,7 +3,7 @@
 
 const L = require('./_lib');
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== 'POST') return L.fail(res, 405, 'Только POST');
 
   const ip = L.clientIp(req);
@@ -48,3 +48,5 @@ module.exports = async (req, res) => {
     message: 'Проверим платёж вручную. Обычно это занимает до 30 минут в рабочее время.',
   });
 };
+
+module.exports = L.wrap(handler);

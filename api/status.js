@@ -3,7 +3,7 @@
 const L = require('./_lib');
 const R = require('./_render');
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const code = L.clean(url.searchParams.get('code'), 12).toUpperCase();
   if (!code) return L.fail(res, 400, 'Укажите код заказа');
@@ -42,3 +42,5 @@ module.exports = async (req, res) => {
 
   return L.send(res, 200, out);
 };
+
+module.exports = L.wrap(handler);

@@ -3,7 +3,7 @@
 const L = require('./_lib');
 const R = require('./_render');
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const slug = L.clean(url.searchParams.get('slug'), 60).toLowerCase();
 
@@ -24,3 +24,5 @@ module.exports = async (req, res) => {
   res.statusCode = 200;
   return res.end(R.render(draft.data, draft.dna, { preview: false }));
 };
+
+module.exports = L.wrap(handler);

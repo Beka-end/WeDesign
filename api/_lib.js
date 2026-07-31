@@ -37,7 +37,11 @@ async function cmd(args) {
     },
     body: JSON.stringify(args),
   });
-  if (!r.ok) throw new Error('storage_error_' + r.status);
+  if (!r.ok) {
+    const err = new Error('storage_error_' + r.status);
+    err.storage = r.status;
+    throw err;
+  }
   const data = await r.json();
   return data.result;
 }
@@ -321,8 +325,38 @@ function slugify(value) {
     .slice(0, 40) || 'site';
 }
 
+/* ------------------------------------------------------------------ */
+/* Общая обёртка над обработчиками                                      */
+/* Любая неожиданная ошибка превращается в понятный JSON, а не в 500.   */
+/* ------------------------------------------------------------------ */
+
+function storageHint(status) {
+  if (status === 401 || status === 403)
+    return 'Хранилище отклонило запрос (код ' + status + '). В переменных Vercel неверный токен Upstash: нужен основной KV_REST_API_TOKEN, а не read-only. После замены сделайте Redeploy.';
+  if (status === 404)
+    return 'Хранилище не найдено по указанному адресу. Проверьте KV_REST_API_URL — он должен начинаться на https:// и заканчиваться на upstash.io.';
+  if (status === 429)
+    return 'Исчерпан лимит бесплатного тарифа хранилища. Загляните в панель Upstash.';
+  return 'Хранилище не отвечает (код ' + status + '). Попробуйте через минуту.';
+}
+
+function wrap(handler) {
+  return async function (req, res) {
+    try {
+      return await handler(req, res);
+    } catch (e) {
+      // В логи Vercel — всё как есть, чтобы можно было починить.
+      console.error('[wedesign]', req.url, e && e.stack ? e.stack : e);
+      if (res.headersSent) return;
+      if (e && e.storage) return fail(res, 503, storageHint(e.storage));
+      return fail(res, 500, 'На сервере что-то сломалось. Точная причина — в логах Vercel.');
+    }
+  };
+}
+
 module.exports = {
   store,
+  wrap,
   getJSON,
   setJSON,
   clientIp,

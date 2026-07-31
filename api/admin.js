@@ -4,7 +4,7 @@
 const L = require('./_lib');
 const R = require('./_render');
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   if (req.method !== 'POST') return L.fail(res, 405, 'Только POST');
 
   const ip = L.clientIp(req);
@@ -116,3 +116,5 @@ module.exports = async (req, res) => {
 
   return L.fail(res, 400, 'Неизвестное действие');
 };
+
+module.exports = L.wrap(handler);

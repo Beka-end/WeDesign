@@ -5,7 +5,7 @@
 const L = require('./_lib');
 const R = require('./_render');
 
-module.exports = async (req, res) => {
+const handler = async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const id = L.clean(url.searchParams.get('id'), 20);
   if (!id) return L.fail(res, 400, 'Не указан черновик');
@@ -32,3 +32,5 @@ module.exports = async (req, res) => {
     name: draft.data.name,
   });
 };
+
+module.exports = L.wrap(handler);
