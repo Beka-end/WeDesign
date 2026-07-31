@@ -61,6 +61,10 @@ function parseJSON(text) {
 }
 
 function buildPrompt(input) {
+  const list = input.services.length
+    ? input.services.map((s) => '- ' + s.name + (s.price ? ' (цена: ' + s.price + ')' : '')).join('\n')
+    : '(владелец услуги не перечислил)';
+
   return `Ты копирайтер, который пишет тексты для сайта малого бизнеса в Казахстане.
 
 Данные от владельца:
@@ -70,11 +74,22 @@ function buildPrompt(input) {
 Описание своими словами: ${input.description}
 Телефон: ${input.phone || 'не указан'}
 
+Услуги, которые назвал владелец:
+${list}
+
+САМОЕ ВАЖНОЕ ПРАВИЛО. Всё, чего нет в данных выше, — не существует.
+Ты не консультант и не маркетолог, ты записываешь за владельцем.
+${input.services.length
+  ? 'Список услуг закрыт: возьми РОВНО эти названия, ни одного не добавляй и не убирай. Твоя работа — только описание к каждой в одно предложение.'
+  : 'Владелец услуги не перечислил. Выведи не больше трёх и только те, которые прямо названы в его описании. Если в описании услуг нет — верни пустой массив services.'}
+Цены не придумывай никогда: поле price оставляй пустым, его заполнит сервер из слов владельца.
+В ответах на вопросы не называй цен, сроков, гарантий, скидок и акций, если владелец о них не написал.
+
 Напиши тексты для одностраничного сайта уровня хорошего агентства. Правила:
 - только русский язык, живой и конкретный, без канцелярита, без «инновационный», «качественный сервис», «индивидуальный подход»;
-- НЕ ВЫДУМЫВАЙ факты: скидки, награды, число лет, количество клиентов — только если владелец сам это написал;
+- НЕ ВЫДУМЫВАЙ факты: скидки, награды, число лет, количество клиентов, число мастеров, площадь, парковку — ничего, чего нет в описании;
 - заголовок короткий, до 8 слов, про выгоду клиента, а не название компании;
-- 4–6 услуг, описание в одно живое предложение; price оставь пустым, если цена не названа;
+- описание услуги — одно живое предложение, без обещаний, которых владелец не давал;
 - ровно 3 цифры для блока статистики. Бери их ТОЛЬКО из описания владельца. Если чисел в описании нет — верни пустой массив stats, не выдумывай;
 - 3–4 шага «как мы работаем» — реальная последовательность от обращения до результата;
 - 4–5 вопросов-ответов, которые реально задают такому бизнесу;
@@ -103,6 +118,23 @@ function buildPrompt(input) {
 }`;
 }
 
+/* ----------------------------- услуги ------------------------------- */
+// Владелец пишет их по одной в строке, цену — через тире.
+// Всё, что он написал, идёт на сайт как есть. Ничего сверх этого не появится.
+
+function ownerServices(input) {
+  return String(input || '')
+    .split('\n')
+    .map((l) => L.clean(l, 140))
+    .filter(Boolean)
+    .slice(0, 6)
+    .map((line) => {
+      const parts = line.split(/\s+[—–-]\s+|\s*[:|]\s*/);
+      return { name: L.clean(parts[0], 60), price: parts[1] ? L.clean(parts[1], 40) : '' };
+    })
+    .filter((s) => s.name);
+}
+
 /* --------------------------- фотографии ----------------------------- */
 // Принимаем только прямые https-ссылки на картинки: чужой javascript: сюда
 // не пролезет, а битые ссылки не сломают вёрстку.
@@ -113,6 +145,49 @@ function photoUrls(input) {
     .map((u) => L.clean(u, 300))
     .filter((u) => /^https:\/\/[^\s"'<>]+$/i.test(u))
     .slice(0, 3);
+}
+
+/* ------------------- сборка услуг и проверка цифр ------------------- */
+
+// Если владелец перечислил услуги — список закрыт. Модель может дать только
+// описание, а название и цена берутся из его слов. Если не перечислил —
+// оставляем максимум три и стираем все цены: выдуманная цена хуже её отсутствия.
+
+function buildServices(owner, fromModel) {
+  const said = Array.isArray(fromModel) ? fromModel : [];
+
+  if (owner.length) {
+    const texts = {};
+    said.forEach((s) => {
+      texts[String(s.name || '').toLowerCase().trim()] = L.clean(s.text, 220);
+    });
+    return owner.map((o) => ({
+      name: o.name,
+      text: texts[o.name.toLowerCase()] || '',
+      price: o.price,
+    }));
+  }
+
+  return said.slice(0, 3).map((s) => ({
+    name: L.clean(s.name, 60),
+    text: L.clean(s.text, 220),
+    price: '',
+  })).filter((s) => s.name);
+}
+
+// Цифра попадёт на сайт, только если она встречается в словах владельца.
+// «8 лет на рынке», которых он не называл, отсеется здесь.
+
+function keepRealStats(stats, sourceText) {
+  const digits = String(sourceText).replace(/\D/g, '');
+  return (Array.isArray(stats) ? stats : [])
+    .slice(0, 3)
+    .map((s) => ({ value: L.clean(s.value, 12), label: L.clean(s.label, 40) }))
+    .filter((s) => {
+      if (!s.value || !s.label) return false;
+      const d = s.value.replace(/\D/g, '');
+      return d ? digits.indexOf(d) >= 0 : false;
+    });
 }
 
 /* ------------------------- уникальность ДНК ------------------------- */
@@ -164,10 +239,14 @@ const handler = async (req, res) => {
   );
   if (!globalDay.ok) return L.fail(res, 503, 'Сегодня генератор перегружен. Напишите нам в WhatsApp');
 
+  const owner = ownerServices(body.services);
+
   // ---- собственно генерация ----
   let content;
   try {
-    const raw = await callModel(buildPrompt({ name, city, category, description, phone: L.clean(body.phone, 30) }));
+    const raw = await callModel(
+      buildPrompt({ name, city, category, description, phone: L.clean(body.phone, 30), services: owner })
+    );
     content = parseJSON(raw);
   } catch (e) {
     if (String(e.message) === 'no_ai_key') return L.fail(res, 500, 'На сервере не настроен ключ ИИ');
@@ -186,17 +265,10 @@ const handler = async (req, res) => {
     subheadline: L.clean(content.subheadline, 260),
     ctaText: L.clean(content.ctaText, 24) || 'Записаться',
     servicesTitle: L.clean(content.servicesTitle, 60),
-    services: (content.services || []).slice(0, 6).map((s) => ({
-      name: L.clean(s.name, 60),
-      text: L.clean(s.text, 220),
-      price: L.clean(s.price, 40),
-    })),
+    services: buildServices(owner, content.services),
     aboutTitle: L.clean(content.aboutTitle, 60),
     about: L.clean(content.about, 700),
-    stats: (content.stats || []).slice(0, 3).map((s) => ({
-      value: L.clean(s.value, 12),
-      label: L.clean(s.label, 40),
-    })).filter((s) => s.value && s.label),
+    stats: keepRealStats(content.stats, description + ' ' + String(body.services || '')),
     processTitle: L.clean(content.processTitle, 60),
     process: (content.process || []).slice(0, 4).map((s) => ({
       name: L.clean(s.name, 60),

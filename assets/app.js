@@ -210,6 +210,7 @@
       name: $('fName').value.trim(),
       city: $('fCity').value.trim(),
       category: $('fCategory').value.trim(),
+      services: $('fServices').value.trim(),
       description: desc.value.trim(),
       phone: $('fPhone').value.trim(),
       whatsapp: $('fWhatsapp').value.trim(),
@@ -360,7 +361,7 @@
         link.href = URL.createObjectURL(new Blob([data.html], { type: 'text/html' }));
         link.download = code + '.html';
         link.textContent = 'Скачать файл сайта';
-        link.style.cssText = 'display:inline-block;margin-top:12px;font-weight:700;color:#2FE0C0';
+        link.style.cssText = 'display:inline-block;margin-top:12px;font-weight:700;color:var(--ac)';
         out.appendChild(document.createElement('br'));
         out.appendChild(link);
       }
