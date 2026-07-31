@@ -14,6 +14,7 @@ const handler = async (req, res) => {
 
   const draftId = L.clean(body.draftId, 20);
   const contactPhone = L.clean(body.contactPhone, 30);
+  const accId = L.clean(body.termsId, 20);
 
   // Имя при заказе не спрашиваем: платёж опознаётся по уникальной сумме,
   // а имя плательщика придёт вместе с чеком. Телефон — только для связи.
@@ -31,6 +32,15 @@ const handler = async (req, res) => {
       return L.send(res, 200, { ok: true, ...publicOrder(existing) });
     }
   }
+
+  // Расписку берём из нашей базы по номеру, а не со слов клиента.
+  const receipt = accId ? await L.getJSON(`wd:acc:${accId}`) : null;
+  const termsOk = receipt && L.verifyReceipt(receipt);
+
+  // Сверяем устройство: согласие и заказ должны идти с одного места.
+  // Разные — не обязательно обман (человек мог сменить сеть), но повод посмотреть.
+  const device = L.fingerprint(req);
+  const sameDevice = termsOk ? receipt.device === device : null;
 
   const base = L.num('PRICE_KZT', 9990);
   const windowMin = L.num('PAY_WINDOW_MIN', 90);
@@ -50,6 +60,20 @@ const handler = async (req, res) => {
 
   const order = {
     code: 'WD-' + L.code(4),
+    // След согласия: версия документов, время принятия у клиента и время у нас.
+    // Это доказательство на нашей стороне, а не только в браузере клиента.
+    terms: termsOk
+      ? {
+          id: receipt.id,
+          version: receipt.version,
+          at: receipt.at,
+          ip: receipt.ip,
+          device: receipt.device,
+          sameDevice,
+          verified: true,
+        }
+      : { verified: false },
+    device,
     draftId,
     base,
     suffix,
@@ -79,6 +103,7 @@ function publicOrder(o) {
     status: o.status,
     expiresAt: o.expiresAt,
     kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
+    support: L.contacts(),
   };
 }
 

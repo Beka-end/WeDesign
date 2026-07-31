@@ -19,6 +19,136 @@
     del: function (k) { try { localStorage.removeItem('wd_' + k); } catch (e) {} }
   };
 
+  /* ═══════════ контакты поддержки ═══════════ */
+  // Номер живёт в переменных Vercel и подставляется во все места сразу.
+
+  var support = null;
+
+  function waLink(text) {
+    if (!support || !support.whatsapp) return '';
+    return 'https://wa.me/' + support.whatsapp + (text ? '?text=' + encodeURIComponent(text) : '');
+  }
+
+  function askText(extra) {
+    var base = 'Здравствуйте! Нужна помощь по WeDesign.';
+    if (order && order.code) return base + ' Код заказа: ' + order.code + '.' + (extra ? ' ' + extra : '');
+    var saved = STORE.get('order');
+    if (saved) return base + ' Код заказа: ' + saved + '.';
+    return base;
+  }
+
+  async function loadSupport() {
+    try {
+      var r = await fetch('/api/contacts');
+      var d = await r.json();
+      support = d.ok ? d.support : null;
+    } catch (e) { support = null; }
+    paintSupport();
+  }
+
+  function paintSupport() {
+    var box = $('helpLinks');
+    if (!support || (!support.whatsapp && !support.phone && !support.email)) {
+      box.innerHTML = '<p class="micro">Контакты пока не настроены. Владельцу сервиса: задайте SUPPORT_WHATSAPP в переменных Vercel.</p>';
+      return;
+    }
+    var html = '';
+    if (support.whatsapp)
+      html += '<a class="btn" href="' + waLink(askText()) + '" target="_blank" rel="noopener">Написать в WhatsApp</a>';
+    if (support.phone)
+      html += '<a class="btn o" href="tel:' + support.phone.replace(/[^0-9+]/g, '') + '">' + support.phone + '</a>';
+    if (support.email)
+      html += '<a class="btn o" href="mailto:' + support.email + '">' + support.email + '</a>';
+    box.innerHTML = html;
+    if (support.hours) $('helpHours').textContent = support.hours;
+
+    if (support.whatsapp) {
+      var btn = $('helpBtn');
+      btn.href = waLink(askText());
+      btn.hidden = false;
+    }
+  }
+
+  loadSupport();
+
+  /* ═══════════ согласие с условиями ═══════════ */
+  // Версию поднимаем при каждом изменении оферты — тогда согласие спросят заново.
+  var TERMS = '2026-08-01';
+  var accepted = null;
+
+  function loadAccepted() {
+    try {
+      var raw = STORE.get('terms');
+      if (!raw) return null;
+      var v = JSON.parse(raw);
+      return v && v.version === TERMS ? v : null;
+    } catch (e) { return null; }
+  }
+
+  function openGate() {
+    $('gate').hidden = false;
+    document.body.classList.add('locked');
+  }
+  function closeGate() {
+    $('gate').hidden = true;
+    document.body.classList.remove('locked');
+  }
+
+  accepted = loadAccepted();
+  if (!accepted) openGate();
+
+  $('gateYes').addEventListener('click', async function () {
+    var box = $('gateBox');
+    if (!box.checked) {
+      var wrap = box.closest('.gate-check');
+      wrap.classList.remove('bad');
+      void wrap.offsetWidth;
+      wrap.classList.add('bad');
+      show($('gateError'), 'Поставьте галочку — без неё продолжить нельзя. Оба документа открываются по ссылкам выше.');
+      setTimeout(function () { wrap.classList.remove('bad'); }, 2600);
+      box.focus();
+      return;
+    }
+    var btn = this;
+    btn.disabled = true;
+    try {
+      // Расписку выписывает сервер: время и адрес он ставит свои.
+      var r = await api('/api/terms', { version: TERMS });
+      accepted = { version: TERMS, id: r.id, at: r.at };
+      STORE.set('terms', JSON.stringify(accepted));
+      $('gateId').textContent = r.id;
+      $('gateAsk').hidden = true;
+      $('gateDone').hidden = false;
+    } catch (e) {
+      show($('gateError'), e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('gateGo').addEventListener('click', closeGate);
+
+  $('gateNo').addEventListener('click', function () {
+    $('gateAsk').hidden = true;
+    $('gateBye').hidden = false;
+  });
+
+  $('gateBack').addEventListener('click', function () {
+    $('gateBye').hidden = true;
+    $('gateAsk').hidden = false;
+    $('gateError').hidden = true;
+    $('gateBox').focus();
+  });
+
+  // Если согласия нет — сервис не работает, независимо от того, куда нажали.
+  function requireTerms() {
+    if (accepted) return true;
+    $('gateAsk').hidden = false;
+    $('gateBye').hidden = true;
+    openGate();
+    return false;
+  }
+
   /* ═══════════ движение ═══════════ */
 
   var rv = document.querySelectorAll('.rv');
@@ -144,7 +274,16 @@
   }
 
   var desc = $('fDescription');
-  desc.addEventListener('input', function () { $('descCount').textContent = desc.value.length; });
+  desc.addEventListener('input', function () {
+    var n = desc.value.trim().length;
+    $('descCount').textContent = desc.value.length;
+    var hint = $('descHint');
+    if (n === 0) hint.textContent = 'минимум 40 символов';
+    else if (n < 40) hint.textContent = 'ещё ' + (40 - n) + ' символов';
+    else hint.textContent = 'готово, можно собирать';
+    hint.classList.toggle('ready', n >= 40);
+    if (n >= 40) $('heroError').hidden = true;
+  });
 
   /* ═══════════ вызов API ═══════════ */
 
@@ -183,11 +322,28 @@
     el.hidden = false;
     el.textContent = text;
     el.classList.toggle('good', !!good);
+    // Каждое нажатие должно быть заметно, даже если текст тот же самый.
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+  }
+
+  // Ошибка не просто пишется — она приводит человека к нужному полю
+  // и подсвечивает его. Иначе кажется, что кнопка не работает.
+  function pointAt(field, el, text) {
+    show(el, text, false);
+    field.classList.remove('bad');
+    void field.offsetWidth;
+    field.classList.add('bad');
+    field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { field.focus({ preventScroll: true }); }, 400);
+    setTimeout(function () { field.classList.remove('bad'); }, 2600);
   }
 
   /* ═══════════ генерация ═══════════ */
 
   async function generate() {
+    if (!requireTerms()) return;
     var btn = $('btnGenerate');
     var err = $('genError');
     err.hidden = true;
@@ -208,10 +364,15 @@
       elapsed: Date.now() - openedAt
     };
 
-    if (!payload.name || !payload.city || !payload.category)
-      return show(err, 'Заполните название, город и сферу — без этого сайт не собрать.');
-    if (payload.description.length < 40)
-      return show(err, 'Описание слишком короткое. Напишите 3-4 предложения: что делаете, для кого, чем отличаетесь.');
+    if (payload.description.length < 40) {
+      var need = 40 - payload.description.length;
+      return pointAt(desc, err, payload.description.length === 0
+        ? 'Описание пустое. Оно вводится в большое поле наверху страницы — я перенёс вас туда.'
+        : 'Описание короткое: не хватает ' + need + ' символов. Поле наверху страницы, я перенёс вас туда. Напишите 3-4 предложения: что делаете, для кого, чем отличаетесь.');
+    }
+    if (!payload.name) return pointAt($('fName'), err, 'Не хватает названия — впишите его в поле «Название».');
+    if (!payload.city) return pointAt($('fCity'), err, 'Не хватает города — впишите его в поле «Город».');
+    if (!payload.category) return pointAt($('fCategory'), err, 'Не хватает сферы: барбершоп, кофейня, автосервис — впишите своё.');
 
     var hero = $('btnHero');
     btn.disabled = true;
@@ -245,16 +406,26 @@
   // Кнопка в первом экране: если короткие поля ещё пустые — ведём к ним,
   // а не ругаемся непонятной ошибкой.
   $('btnHero').addEventListener('click', function () {
-    if (desc.value.trim().length < 40) {
+    if (!requireTerms()) return;
+    var len = desc.value.trim().length;
+    if (len < 40) {
+      var need = 40 - len;
+      show($('heroError'), len === 0
+        ? 'Опишите своё дело в этом поле — что делаете, для кого и чем отличаетесь.'
+        : 'Ещё ' + need + ' символов, и собираем. Напишите 3-4 предложения: что делаете, для кого, чем отличаетесь.');
       desc.focus();
       return;
     }
+    $('heroError').hidden = true;
     if (!$('fName').value.trim() || !$('fCity').value.trim() || !$('fCategory').value.trim()) {
+      show($('heroError'), 'Описание готово. Осталось название, город и сфера — они чуть ниже, я перенёс вас туда.', true);
       $('build').scrollIntoView({ behavior: 'smooth' });
       setTimeout(function () {
-        show($('genError'), 'Осталось указать название, город и сферу — и собираем.');
-        ($('fName').value.trim() ? $('fCategory') : $('fName')).focus();
-      }, 400);
+        var f = !$('fName').value.trim() ? $('fName') : (!$('fCity').value.trim() ? $('fCity') : $('fCategory'));
+        f.classList.add('bad');
+        f.focus({ preventScroll: true });
+        setTimeout(function () { f.classList.remove('bad'); }, 2600);
+      }, 500);
       return;
     }
     generate();
@@ -296,7 +467,8 @@
           showDone(d);
         } else if (d.status === 'rejected') {
           stopWatch();
-          show($('claimMsg'), 'Платёж не подтверждён' + (d.note ? ': ' + d.note : '') + '. Напишите нам, разберёмся.');
+          var t = 'Платёж не подтверждён' + (d.note ? ': ' + d.note : '') + '.';
+          show($('claimMsg'), t + (support && support.whatsapp ? ' Напишите нам — кнопка помощи в углу экрана, назовите код ' + d.code + '.' : ''));
         }
       } catch (e) { /* сети нет — попробуем в следующий раз */ }
     }
@@ -344,6 +516,7 @@
   });
 
   $('btnTake').addEventListener('click', async function () {
+    if (!requireTerms()) return;
     if (!draftId) return;
     var err = $('takeError');
     err.hidden = true;
@@ -358,7 +531,11 @@
     btn.disabled = true;
     btn.textContent = 'Бронирую сумму…';
     try {
-      var made = await api('/api/order', { draftId: draftId, contactPhone: phone });
+      var made = await api('/api/order', {
+        draftId: draftId,
+        contactPhone: phone,
+        termsId: accepted ? accepted.id : ''
+      });
       STORE.set('order', made.code);
       openPay(made);
       $('pay').scrollIntoView({ behavior: 'smooth' });
@@ -384,7 +561,17 @@
         amountPaid: Number(String($('cAmount').value).replace(/\D/g, '')),
         paidAt: $('cPaidAt').value
       });
-      show(msg, data.message + ' Не закрывайте страницу — как только платёж подтвердят, ссылка на сайт появится здесь сама. Код заказа на всякий случай: ' + order.code, true);
+      show(msg, data.message + ' Не закрывайте страницу — как только платёж подтвердят, ссылка на сайт появится здесь сама. Код заказа: ' + order.code + '.', true);
+      if (support && support.whatsapp) {
+        var a = document.createElement('a');
+        a.href = waLink(askText());
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = 'Написать нам, если что-то не так';
+        a.style.cssText = 'display:inline-block;margin-top:10px;color:var(--ac);font-weight:700';
+        msg.appendChild(document.createElement('br'));
+        msg.appendChild(a);
+      }
       watchOrder(order.code);
     } catch (e) {
       show(msg, e.message);
@@ -400,8 +587,13 @@
     $('doneUrl').textContent = url;
     $('doneUrl').href = url;
     $('btnOpenSite').href = url;
-    $('doneNote').textContent =
-      'Нужно поправить текст или добавить фотографии — напишите нам и назовите код заказа ' + data.code + '.';
+    $('doneNote').innerHTML =
+      'Нужно поправить текст или добавить фотографии — ' +
+      (support && support.whatsapp
+        ? '<a href="' + waLink('Здравствуйте! Хочу поправить сайт по заказу ' + data.code + '.') +
+          '" target="_blank" rel="noopener" style="color:var(--ac);font-weight:700">напишите нам в WhatsApp</a>'
+        : 'напишите нам') +
+      ' и назовите код заказа ' + data.code + '.';
     $('done').hidden = false;
     $('done').scrollIntoView({ behavior: 'smooth' });
   }

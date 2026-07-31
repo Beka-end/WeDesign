@@ -29,6 +29,26 @@
   .steps-check{background:var(--paper2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:14.5px;color:var(--muted);margin:14px 0}
   .steps-check b{color:var(--text)}
   .row-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .chain{background:var(--soft);border-radius:12px;padding:16px 18px;margin:14px 0;font-size:14.5px}
+  .chain>b{display:block;margin-bottom:10px}
+  .chain-row{display:grid;grid-template-columns:170px 1fr;gap:12px;padding:7px 0;border-top:1px solid var(--line)}
+  .chain-row span{color:var(--mu);font-size:13.5px}
+  @media(max-width:640px){.chain-row{grid-template-columns:1fr;gap:2px}}
+  .lookup{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+  .lookup-row{display:flex;gap:9px;flex-wrap:wrap}
+  .lookup input{background:var(--soft);border:1.5px solid transparent;border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--ink);width:210px}
+  .lookup input:focus{border-color:var(--ac);background:var(--card);outline:none}
+  .acc-out{background:var(--card);border-radius:16px;padding:22px;margin-bottom:16px;box-shadow:var(--sh-1)}
+  .acc-out.bad{box-shadow:inset 0 0 0 2px var(--danger)}
+  .acc-out.ok{box-shadow:inset 0 0 0 2px var(--ok)}
+  .acc-out h3{margin-bottom:14px}
+  .acc-out table{width:100%;border-collapse:collapse;font-size:14.5px}
+  .acc-out td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .acc-out td:first-child{color:var(--mu);width:36%}
+  .acc-out tr:last-child td{border-bottom:0}
+  .verdict{font-weight:700;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:15px}
+  .verdict.ok{background:#15803D14;color:var(--ok)}
+  .verdict.bad{background:#B3271B14;color:var(--danger)}
   dialog{background:var(--ink-2);color:var(--text);border:1px solid var(--line);border-radius:var(--r);padding:0;width:min(1000px,94vw);max-height:92vh}
   dialog iframe{width:100%;height:76vh;border:0;background:#fff;display:block}
   .dlg-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
@@ -56,6 +76,18 @@
       <button class="btn btn-ghost btn-sm" id="btnLogout">Выйти</button>
     </div>
   </div>
+
+  <div class="lookup">
+    <div>
+      <b>Проверить расписку о согласии</b>
+      <p class="micro" style="margin:4px 0 0">Введите номер вида ACC-XXXXXXXX — покажем, что и когда принял клиент, и цела ли подпись.</p>
+    </div>
+    <div class="lookup-row">
+      <input id="accId" placeholder="ACC-WM8N97W5" maxlength="20">
+      <button class="btn btn-sm" id="btnAcc">Проверить</button>
+    </div>
+  </div>
+  <div class="acc-out" id="accOut" hidden></div>
 
   <div class="filters">
     <button class="chip-btn" data-f="claimed">Ждут проверки</button>

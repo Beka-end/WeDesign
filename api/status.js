@@ -31,6 +31,7 @@ const handler = async (req, res) => {
     slug: order.slug || null,
     note: order.note || null,
     kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
+    support: L.contacts(),
   };
 
   // Клиенту отдаём ссылку на живой сайт, а не файл: файл ему некуда девать.

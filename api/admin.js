@@ -52,9 +52,29 @@ const handler = async (req, res) => {
     });
   }
 
+  // Проверка расписки о согласии: показывает, цела ли подпись.
+  if (action === 'receipt') {
+    const id = L.clean(body.id, 20).toUpperCase();
+    const rec = await L.getJSON(`wd:acc:${id}`);
+    if (!rec) return L.fail(res, 404, 'Расписка с таким номером не найдена');
+    return L.send(res, 200, { ok: true, receipt: rec, valid: L.verifyReceipt(rec) });
+  }
+
   const code = L.clean(body.code, 12).toUpperCase();
   const order = code ? await L.getJSON(`wd:order:${code}`) : null;
   if (!order) return L.fail(res, 404, 'Заказ не найден');
+
+  // Файл сайта для передачи клиенту: он же обещан в оферте.
+  if (action === 'export') {
+    const draft = await L.getJSON(`wd:draft:${order.draftId}`);
+    if (!draft) return L.fail(res, 404, 'Черновик уже удалён, файл собрать не из чего');
+    return L.send(res, 200, {
+      ok: true,
+      html: R.render(draft.data, draft.dna, { preview: false }),
+      filename: (order.slug || L.slugify(order.business)) + '.html',
+      business: order.business,
+    });
+  }
 
   if (action === 'preview') {
     const draft = await L.getJSON(`wd:draft:${order.draftId}`);

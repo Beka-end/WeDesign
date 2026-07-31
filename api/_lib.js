@@ -186,10 +186,18 @@ async function readBody(req) {
       return {};
     }
   }
-  const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
-  if (!chunks.length) return {};
+  // Тело может прийти потоком. Если поток недоступен или битый — считаем тело пустым,
+  // но не роняем функцию: пустой запрос должен получить понятный ответ, а не 500.
   try {
+    if (!req || typeof req[Symbol.asyncIterator] !== 'function') return {};
+    const chunks = [];
+    let size = 0;
+    for await (const chunk of req) {
+      size += chunk.length;
+      if (size > 1024 * 512) return {}; // полмегабайта — потолок, дальше не читаем
+      chunks.push(chunk);
+    }
+    if (!chunks.length) return {};
     return JSON.parse(Buffer.concat(chunks).toString('utf8'));
   } catch (e) {
     return {};
@@ -268,6 +276,42 @@ function verifyAdminToken(token) {
   } catch (e) {
     return false;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Расписка о согласии                                                  */
+/* Сервер сам ставит время и подписывает запись своим ключом. Подделать */
+/* её со стороны клиента нельзя, изменить задним числом — тоже: любая   */
+/* правка ломает подпись.                                               */
+/* ------------------------------------------------------------------ */
+
+function signReceipt(payload) {
+  const body = JSON.stringify(payload);
+  const sig = crypto.createHmac('sha256', secret()).update(body).digest('hex');
+  return { ...payload, sig };
+}
+
+function verifyReceipt(receipt) {
+  if (!receipt || !receipt.sig) return false;
+  const { sig, ...payload } = receipt;
+  const expected = crypto
+    .createHmac('sha256', secret())
+    .update(JSON.stringify(payload))
+    .digest('hex');
+  const a = Buffer.from(String(sig));
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+// Отпечаток устройства: без имён и точных данных, только то, что пришло
+// в самом запросе. Нужен, чтобы показать — заходили с того же устройства.
+function fingerprint(req) {
+  const parts = [
+    req.headers['user-agent'] || '',
+    req.headers['accept-language'] || '',
+    clientIp(req),
+  ].join('|');
+  return crypto.createHash('sha256').update(parts).digest('hex').slice(0, 16);
 }
 
 function samePassword(input) {
@@ -364,8 +408,25 @@ function wrap(handler) {
   };
 }
 
+/* ------------------------------------------------------------------ */
+/* Контакты владельца                                                   */
+/* Задаются переменными Vercel, чтобы номер лежал в одном месте.        */
+/* ------------------------------------------------------------------ */
+
+function contacts() {
+  const wa = String(process.env.SUPPORT_WHATSAPP || '').replace(/\D/g, '');
+  const phone = String(process.env.SUPPORT_PHONE || process.env.SUPPORT_WHATSAPP || '').trim();
+  return {
+    whatsapp: wa.length >= 10 ? wa : '',
+    phone: phone || '',
+    email: String(process.env.SUPPORT_EMAIL || '').trim(),
+    hours: String(process.env.SUPPORT_HOURS || 'с 10:00 до 20:00, время Астаны').trim(),
+  };
+}
+
 module.exports = {
   store,
+  contacts,
   wrap,
   getJSON,
   setJSON,
@@ -377,6 +438,9 @@ module.exports = {
   num,
   DAY,
   signAdminToken,
+  signReceipt,
+  verifyReceipt,
+  fingerprint,
   verifyAdminToken,
   samePassword,
   requireAdmin,

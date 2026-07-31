@@ -125,6 +125,9 @@
     list.querySelectorAll('[data-act]').forEach(function (b) {
       b.addEventListener('click', function () { act(b.dataset.act, b.dataset.code); });
     });
+    list.querySelectorAll('[data-acc]').forEach(function (b) {
+      b.addEventListener('click', function () { checkReceipt(b.dataset.acc); });
+    });
   }
 
   function card(o) {
@@ -152,11 +155,22 @@
           (c.receiptNo ? '<div><span>Номер чека</span><b class="mono">' + esc(c.receiptNo) + '</b></div>' : '') +
           (c.amountPaid ? '<div><span>Заявленная сумма</span><b class="mono">' + tenge(c.amountPaid) + ' ₸</b></div>' : '') +
           (o.slug ? '<div><span>Адрес сайта</span><b style="font-size:14px">/s/' + esc(o.slug) + '</b></div>' : '') +
+          (o.terms && o.terms.verified
+            ? '<div><span>Согласие с условиями</span><b style="font-size:13px">' +
+              when(o.terms.at) + '<br><span class="mono" style="font-size:12px">' + esc(o.terms.id) + '</span>' +
+              (o.terms.sameDevice === false ? '<br><span style="color:var(--amber);font-size:12px">заказ с другого устройства</span>' : '') +
+              '</b></div>'
+            : '<div><span>Согласие с условиями</span><b style="font-size:13px;color:var(--danger)">не зафиксировано</b></div>') +
         '</div>' +
         (risky ? '<div class="risk"><b>Обратите внимание:</b><ul><li>' + o.risk.map(esc).join('</li><li>') + '</li></ul></div>' : '') +
+        chain(o) +
         checklist +
         '<div class="row-actions">' +
           '<button class="btn btn-ghost btn-sm" data-act="preview" data-code="' + o.code + '">Открыть сайт</button>' +
+          (o.terms && o.terms.verified
+            ? '<button class="btn btn-ghost btn-sm" data-acc="' + esc(o.terms.id) + '">Расписка о согласии</button>'
+            : '') +
+          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="export" data-code="' + o.code + '">Скачать файл сайта</button>' : '') +
           (o.status === 'paid' && o.slug && o.contactPhone
             ? '<a class="btn btn-sm" target="_blank" rel="noopener" href="https://wa.me/' +
               encodeURIComponent(String(o.contactPhone).replace(/\D/g, '')) +
@@ -172,8 +186,42 @@
       '</div>';
   }
 
+  // Что мы знаем о человеке за этим заказом. Регистрации нет — поэтому
+  // единственная настоящая привязка к личности приходит из банка.
+  function chain(o) {
+    if (o.status !== 'claimed' && o.status !== 'paid') return '';
+    var c = o.claim || {};
+    var rows = [];
+    rows.push(['Назвался при заказе', esc(o.contactPhone) + ' — телефон не подтверждён, вписать можно любой']);
+    if (o.terms && o.terms.verified)
+      rows.push(['Принял условия', when(o.terms.at) + ', адрес ' + esc(o.terms.ip) +
+        (o.terms.sameDevice === false ? ' — но заказ оформлен с другого устройства' : ' — с того же устройства, что и заказ')]);
+    else
+      rows.push(['Принял условия', '<span style="color:var(--danger)">не зафиксировано</span>']);
+    if (c.payerName)
+      rows.push(['Опознан банком', '<b>' + esc(c.payerName) + '</b> — так Kaspi показывает отправителя. Это единственное имя, которое проверил не мы, а банк']);
+    return '<div class="chain"><b>Кто стоит за заказом</b>' +
+      rows.map(function (r) {
+        return '<div class="chain-row"><span>' + r[0] + '</span><div>' + r[1] + '</div></div>';
+      }).join('') + '</div>';
+  }
+
   async function act(action, code) {
     try {
+      if (action === 'export') {
+        var f = await call({ action: 'export', code: code });
+        var blob = new Blob([f.html], { type: 'text/html;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = f.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        alert('Файл сохранён: ' + f.filename + '\n\nОтправьте его клиенту и дайте ссылку на инструкцию: ' + location.origin + '/fayl.html');
+        return;
+      }
       if (action === 'preview') {
         var data = await call({ action: 'preview', code: code });
         $('dlgTitle').textContent = code + ' · ' + data.dnaCode;
@@ -193,6 +241,52 @@
     } catch (e) {
       alert(e.message);
     }
+  }
+
+  /* ————— проверка расписки о согласии ————— */
+
+  $('btnAcc').addEventListener('click', async function () {
+    var id = $('accId').value.trim().toUpperCase();
+    var out = $('accOut');
+    out.hidden = true;
+    out.className = 'acc-out';
+    if (!id) return;
+    try {
+      var d = await call({ action: 'receipt', id: id });
+      var r = d.receipt;
+      out.innerHTML =
+        '<div class="verdict ' + (d.valid ? 'ok' : 'bad') + '">' +
+          (d.valid
+            ? 'Подпись цела. Запись подлинная и не изменялась после создания.'
+            : 'Подпись не сходится. Запись изменена или сделана другим ключом — доверять ей нельзя.') +
+        '</div>' +
+        '<h3>Расписка ' + esc(r.id) + '</h3>' +
+        '<table>' +
+          '<tr><td>Что принято</td><td>Публичная оферта и политика обработки персональных данных, редакция <b>' + esc(r.version) + '</b></td></tr>' +
+          '<tr><td>Когда</td><td><b>' + when(r.at) + '</b> (время сервера, не устройства клиента)</td></tr>' +
+          '<tr><td>Сетевой адрес</td><td class="mono">' + esc(r.ip) + '</td></tr>' +
+          '<tr><td>Отпечаток устройства</td><td class="mono">' + esc(r.device) + '</td></tr>' +
+          '<tr><td>Браузер</td><td style="font-size:13px">' + esc(r.ua || '—') + '</td></tr>' +
+          '<tr><td>Язык</td><td>' + esc(r.lang || '—') + '</td></tr>' +
+          '<tr><td>Подпись</td><td class="mono" style="font-size:11.5px;word-break:break-all">' + esc(r.sig) + '</td></tr>' +
+        '</table>' +
+        '<p class="micro" style="margin-top:14px">Эту таблицу можно распечатать или сохранить как PDF через печать страницы.</p>';
+      out.classList.add(d.valid ? 'ok' : 'bad');
+      out.hidden = false;
+    } catch (e) {
+      out.className = 'acc-out bad';
+      out.innerHTML = '<div class="verdict bad">' + esc(e.message) + '</div>';
+      out.hidden = false;
+    }
+  });
+
+  $('accId').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('btnAcc').click(); });
+
+  // Из карточки заказа — сразу к его расписке.
+  function checkReceipt(id) {
+    $('accId').value = id;
+    $('btnAcc').click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   document.querySelectorAll('[data-f]').forEach(function (b) {

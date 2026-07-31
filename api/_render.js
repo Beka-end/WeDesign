@@ -90,14 +90,24 @@ function dnaCode(d){
 
 /* ══════════════════════════ часы ══════════════════════════ */
 
+// Время приводим к настоящему ЧЧ:ММ. «25:99» и «<script>» сюда не пройдут.
+function safeTime(v, fallback){
+  const m = String(v || '').match(/^\s*(\d{1,2})\s*[:.\s]\s*(\d{1,2})\s*$/);
+  if (!m) return fallback;
+  const h = Math.min(23, parseInt(m[1], 10));
+  const mi = Math.min(59, parseInt(m[2], 10));
+  return String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0');
+}
+
 function normalizeHours(input){
   const out = {};
+  const src = (input && typeof input === 'object') ? input : {};
   DAYS.forEach(function(pair){
     const k = pair[0];
-    const raw = (input && input[k]) || {};
+    const raw = src[k] && typeof src[k] === 'object' ? src[k] : {};
     out[k] = (raw.closed || (!raw.from && !raw.to))
       ? { closed: true }
-      : { closed:false, from: clean(raw.from,5) || '09:00', to: clean(raw.to,5) || '18:00' };
+      : { closed:false, from: safeTime(raw.from, '09:00'), to: safeTime(raw.to, '18:00') };
   });
   return out;
 }
@@ -284,12 +294,22 @@ ${dna.m==='scale'   ? '.rv{transform:scale(.955)}' : ''}
 function mesh(on){ return on ? '<div class="mesh"><i></i><i></i><i></i></div>' : ''; }
 
 // Вторая линия защиты: даже если в данные попала ссылка вида javascript:,
-// в разметку она не выйдет.
+// в разметку она не выйдет. Проверяется КАЖДЫЙ адрес, попадающий в href или src.
 function safeUrl(u){
   return /^https:\/\/[^\s"'<>]+$/i.test(String(u || '')) ? String(u) : '';
 }
 function photos(d){
   return (d.photos || []).map(safeUrl).filter(Boolean);
+}
+// Для tel: оставляем только цифры, плюс, скобки и дефисы.
+function safeTel(v){
+  const t = String(v || '').replace(/[^0-9+()\-\s]/g, '').trim();
+  return t.replace(/\D/g, '').length >= 5 ? t : '';
+}
+// Только цифры — для wa.me.
+function safeWa(v){
+  const digits = String(v || '').replace(/\D/g, '');
+  return digits.length >= 10 && digits.length <= 15 ? digits : '';
 }
 
 function btn(href, label, ghost){
@@ -318,7 +338,8 @@ function hero(dna, d){
   const kind = HEROES[dna.h];
   const eyebrow = `<div class="eyebrow rv">${esc(d.category)} · ${esc(d.city)}</div>`;
   const cta = btn('#contacts', d.ctaText || 'Записаться');
-  const tel = d.phone ? btn('tel:'+d.phone, d.phone, true) : '';
+  const telNum = safeTel(d.phone);
+  const tel = telNum ? btn('tel:' + telNum, telNum, true) : '';
   const pill = '<span class="pill" data-open-badge>Часы работы</span>';
   const pad = 'padding:clamp(130px,17vw,210px) 0 clamp(70px,9vw,120px)';
 
@@ -378,7 +399,7 @@ function hero(dna, d){
       <p class="lead rv" style="--d:140ms;color:#FFFFFFDD">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;margin-top:32px;display:flex;gap:14px;flex-wrap:wrap">
         <a class="btn" style="background:#fff;color:#111" href="#contacts"><span>${esc(d.ctaText||'Записаться')}</span></a>
-        ${d.phone?`<a class="btn o" style="color:#fff;border-color:#FFFFFF66" href="tel:${esc(d.phone)}"><span>${esc(d.phone)}</span></a>`:''}
+        ${telNum?`<a class="btn o" style="color:#fff;border-color:#FFFFFF66" href="tel:${esc(telNum)}"><span>${esc(telNum)}</span></a>`:''}
       </div></div></header>`;
 
   if (kind === 'glass')
@@ -492,15 +513,17 @@ function hoursBlock(h){
 }
 
 function contactsBlock(d){
-  const wa = d.whatsapp ? String(d.whatsapp).replace(/\D/g,'') : '';
+  const wa = safeWa(d.whatsapp);
+  const tel = safeTel(d.phone);
+  const insta = safeUrl(d.instagram);
   return `<section class="s line" id="contacts"><div class="w">
     <div class="head"><div class="eyebrow rv">Контакты</div><h2 class="rv" style="--d:60ms">${esc(d.contactsTitle||'Свяжитесь с нами')}</h2>
     <p class="lead rv" style="--d:120ms">${esc(d.contactsText||'')}</p></div>
     <div class="rv" style="--d:160ms">
-      ${d.phone?`<a class="big-link" href="tel:${esc(d.phone)}">${esc(d.phone)}</a>`:''}
+      ${tel?`<a class="big-link" href="tel:${esc(tel)}">${esc(tel)}</a>`:''}
       ${wa?`<a class="big-link" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>`:''}
       ${d.address?`<a class="big-link" href="https://2gis.kz/search/${encodeURIComponent(d.address)}" target="_blank" rel="noopener">${esc(d.address)}</a>`:''}
-      ${d.instagram?`<a class="big-link" href="${esc(d.instagram)}" target="_blank" rel="noopener">Instagram</a>`:''}
+      ${insta?`<a class="big-link" href="${esc(insta)}" target="_blank" rel="noopener nofollow">Instagram</a>`:''}
     </div></div></section>`;
 }
 
@@ -508,7 +531,7 @@ function ctaBlock(d){
   return `<section class="s"><div class="w"><div class="cta rv">
     <h2>${esc(d.ctaTitle || 'Готовы записаться?')}</h2>
     <p class="lead">${esc(d.ctaSub || 'Позвоните или напишите в WhatsApp — ответим в рабочее время.')}</p>
-    ${d.phone?`<a class="btn" href="tel:${esc(d.phone)}"><span>${esc(d.phone)}</span></a>`:btn('#contacts','Связаться')}
+    ${safeTel(d.phone)?`<a class="btn" href="tel:${esc(safeTel(d.phone))}"><span>${esc(safeTel(d.phone))}</span></a>`:btn('#contacts','Связаться')}
   </div></div></section>`;
 }
 
@@ -559,13 +582,24 @@ paint();setInterval(paint,60000);
 
 /* ══════════════════════════ страница ══════════════════════════ */
 
+// Любое поле-список приводим к настоящему массиву: строка или null не должны
+// ронять сборку страницы.
+function asList(v){ return Array.isArray(v) ? v : []; }
+
 function render(data, dna, opts){
   const o = opts || {};
   const p = PALETTES[dna.p];
   const f = FONTS[dna.f];
   CURRENT_PAL = p;
   const h = normalizeHours(data.hours);
-  const d = data;
+  const d = Object.assign({}, data, {
+    services: asList(data.services),
+    stats: asList(data.stats),
+    process: asList(data.process),
+    faq: asList(data.faq),
+    reviews: asList(data.reviews),
+    photos: asList(data.photos),
+  });
 
   const blocks = {
     stats: statsBlock(d), services: servicesBlock(d), about: aboutBlock(d),
@@ -612,15 +646,16 @@ function render(data, dna, opts){
 <nav class="nav"><div class="in">
   <a class="brand" href="#">${esc(d.name)}</a>
   <div class="links">${links}</div>
-  ${d.phone?`<a class="btn" href="tel:${esc(d.phone)}" style="padding:11px 22px;font-size:14.5px"><span>Позвонить</span></a>`:''}
+  ${safeTel(d.phone)?`<a class="btn" href="tel:${esc(safeTel(d.phone))}" style="padding:11px 22px;font-size:14.5px"><span>Позвонить</span></a>`:''}
   <button class="burger" aria-label="Меню"><i></i><i></i></button>
 </div></nav>
 <div class="menu">${nav.map(function(n){ return `<a href="${n[0]}">${n[1]}</a>`; }).join('')}</div>
 ${hero(dna,d)}
 ${body}
 <footer><div class="w" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
-<span>© ${new Date().getFullYear()} ${esc(d.name)}</span><span>Собрано в WeDesign · ${esc(dnaCode(dna))}</span></div></footer>
-${d.whatsapp?`<a class="wa" href="https://wa.me/${esc(String(d.whatsapp).replace(/\D/g,''))}" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-1.5-.6-3.4-1.7-4.9-3.8-.6-.8-1-1.7-1.1-2.5-.1-.8.2-1.5.6-1.9.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.4.7 1 1.3 1.6 1.8.6.4 1.1.6 1.3.7.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg></a>`:''}
+<span>© ${new Date().getFullYear()} ${esc(d.name)}${d.city ? ', ' + esc(d.city) : ''}</span>
+<span>Сведения на странице размещены владельцем бизнеса. Сайт собран в WeDesign · ${esc(dnaCode(dna))}</span></div></footer>
+${safeWa(d.whatsapp)?`<a class="wa" href="https://wa.me/${esc(safeWa(d.whatsapp))}" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-1.5-.6-3.4-1.7-4.9-3.8-.6-.8-1-1.7-1.1-2.5-.1-.8.2-1.5.6-1.9.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.4.7 1 1.3 1.6 1.8.6.4 1.1.6 1.3.7.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg></a>`:''}
 ${wm}
 ${scripts(h)}
 </body></html>`;

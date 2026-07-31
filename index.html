@@ -17,6 +17,48 @@
 
 <div class="bar"></div>
 
+<!-- ═════ согласие на входе ═════ -->
+<div class="gate" id="gate" hidden>
+  <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="gate-body" id="gateAsk">
+      <span class="k">Прежде чем начать</span>
+      <h2 id="gateTitle">Условия работы сервиса</h2>
+      <p>WeDesign собирает сайты для бизнеса и размещает их по постоянному адресу. Чтобы пользоваться сервисом, примите два документа:</p>
+      <ul class="gate-list">
+        <li><a href="/oferta.html" target="_blank" rel="noopener">Публичную оферту</a> — что входит в услугу, сколько стоит, как оплатить и когда возможен возврат</li>
+        <li><a href="/politika.html" target="_blank" rel="noopener">Политику обработки персональных данных</a> — какие данные собираются, зачем и как их удалить</li>
+      </ul>
+      <label class="gate-check"><input type="checkbox" id="gateBox"><span>Я прочитал оба документа и принимаю их условия</span></label>
+      <div class="notice" id="gateError" hidden></div>
+      <div class="gate-act">
+        <button class="btn" id="gateYes">Принимаю, продолжить</button>
+        <button class="btn o" id="gateNo">Не принимаю</button>
+      </div>
+      <p class="micro" style="margin-top:14px">Мы запомним ваш выбор, чтобы не спрашивать снова.</p>
+    </div>
+
+    <div class="gate-body" id="gateDone" hidden>
+      <span class="k">Записано</span>
+      <h2>Согласие зафиксировано</h2>
+      <p>Мы записали ваше согласие на своей стороне: время, редакцию документов и номер расписки. Изменить эту запись задним числом нельзя — она защищена подписью.</p>
+      <div class="acc"><span>Номер расписки</span><b class="mono" id="gateId">—</b></div>
+      <p class="micro">Сохраните номер, если хотите: по нему всегда можно проверить, что и когда вы приняли.</p>
+      <div class="gate-act"><button class="btn" id="gateGo">Продолжить</button></div>
+    </div>
+
+    <div class="gate-body" id="gateBye" hidden>
+      <span class="k">Без согласия</span>
+      <h2>Сервис не может работать</h2>
+      <p>Мы собираем и храним ваши данные, чтобы сделать сайт и найти ваш платёж. Без вашего согласия делать это нельзя — поэтому сборка сайтов недоступна.</p>
+      <p>Если передумаете, вернитесь и примите условия. Посмотреть, что мы делаем, можно и без согласия — примеры сайтов открыты.</p>
+      <div class="gate-act">
+        <button class="btn" id="gateBack">Вернуться и принять</button>
+        <a class="btn o" href="/primery/primer-1-barbershop.html" target="_blank" rel="noopener">Посмотреть пример</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═════ первый экран ═════ -->
 <header class="hero">
   <div class="sky"><i></i><i></i><i></i><i></i></div>
@@ -57,7 +99,9 @@
       </div>
     </div>
 
-    <div class="sub"><span id="descCount">0</span> / 900 · каждый сайт неповторим <span class="dna" id="dnaTicker">DNA-7F3A2C</span></div>
+    <div class="notice" id="heroError" hidden></div>
+    <div class="sub"><span id="descCount">0</span> / 900 · <span id="descHint">минимум 40 символов</span> · <span class="dna" id="dnaTicker">DNA-7F3A2C</span></div>
+    <p class="micro" style="margin-top:10px">Продолжая, вы принимаете <a href="/oferta.html" style="color:var(--ac)">оферту</a> и <a href="/politika.html" style="color:var(--ac)">политику данных</a></p>
 
     <div class="tiles">
       <a class="tile" href="/primery/primer-1-barbershop.html" target="_blank" rel="noopener">
@@ -203,6 +247,7 @@
     <button class="btn lg" id="btnGenerate">Собрать сайт</button>
     <span class="micro" id="genHint">Бесплатно, 4 сборки в сутки с одного устройства</span>
   </div>
+  <p class="micro" style="margin-top:14px">Нажимая «Собрать сайт», вы соглашаетесь с <a href="/oferta.html" style="color:var(--ac);font-weight:600">офертой</a> и <a href="/politika.html" style="color:var(--ac);font-weight:600">политикой обработки персональных данных</a>.</p>
   <div class="notice" id="genError" hidden></div>
 </div></section>
 
@@ -243,7 +288,7 @@
       <ul class="codebox-why">
         <li>Открыли сайт с другого телефона — по коду вернётесь к заказу</li>
         <li>Платёж не сошёлся — по коду найдём его за минуту</li>
-        <li>Захотели поправить текст или фото — назовите код в WhatsApp</li>
+        <li>Захотели поправить текст или фото — назовите код в <a href="#help" style="color:var(--ac)">поддержке</a></li>
       </ul>
       <button class="btn o sm" id="btnCopy">Скопировать код</button>
     </div>
@@ -263,6 +308,7 @@
     <button class="btn" id="btnClaim">Отправить на проверку</button>
     <div class="notice" id="claimMsg" hidden></div>
     <p class="micro" style="margin-top:12px">Номер чека в Kaspi: «Платежи» → нужный перевод → «Чек». Он нужен, чтобы один платёж не засчитали дважды.</p>
+    <p class="micro" style="margin-top:8px">Обычно проверяем в течение нескольких часов в рабочее время. Предельный срок по <a href="/oferta.html" style="color:var(--ac)">оферте</a> — 10 рабочих дней: он на случай, если мы окажемся недоступны.</p>
   </div>
 </div></section>
 
@@ -278,7 +324,7 @@
       <a class="btn" id="btnOpenSite" target="_blank" rel="noopener">Открыть сайт</a>
     </div>
   </div>
-  <p class="micro" id="doneNote">Нужно поправить текст или добавить фотографии — напишите нам и назовите код заказа.</p>
+  <p class="micro" id="doneNote">Нужно поправить текст или добавить фотографии — <a href="#help" style="color:var(--ac);font-weight:600">напишите нам</a> и назовите код заказа.</p>
 </div></section>
 
 <!-- ═════ мой заказ ═════ -->
@@ -297,6 +343,21 @@
   </div>
 </div></section>
 
+<!-- ═════ помощь ═════ -->
+<section class="s line" id="help"><div class="w">
+  <div class="helpbox">
+    <div>
+      <span class="k">Помощь</span>
+      <h2>Что-то пошло не так?</h2>
+      <p class="lead">Оплатили, а сайт не включили. Потеряли код заказа. Нужно поправить текст или добавить фотографии. Напишите — разберёмся.</p>
+      <p class="micro">Отвечаем <span id="helpHours">в рабочее время</span>. Назовите код заказа вида WD-XXXX — так найдём вас быстрее всего. Если код не сохранился, назовите сумму платежа и имя отправителя.</p>
+    </div>
+    <div class="help-act" id="helpLinks">
+      <span class="micro">Загружаем контакты…</span>
+    </div>
+  </div>
+</div></section>
+
 <!-- ═════ вопросы ═════ -->
 <section class="s soft line"><div class="w n">
   <div class="head c rv"><span class="k">Вопросы</span><h2>Коротко о главном</h2></div>
@@ -305,7 +366,10 @@
     <details><summary>Откуда берутся тексты и не выдумывает ли он?</summary><p>Услуги и цены берутся только из вашего списка — что написали, то и будет. Цифры вроде «3 кресла» попадают на сайт, только если они есть в вашем описании: сервер сверяет каждую и выкидывает те, которых вы не называли.</p></details>
     <details><summary>А если я напишу туда вопрос или ерунду?</summary><p>Сайт не соберётся. Здесь собираются страницы для бизнеса, а не отвечают на вопросы: если в поле не описание дела, вы получите просьбу описать своё дело, и попытка не будет потрачена.</p></details>
     <details><summary>Что будет, если я закрою вкладку?</summary><p>Ничего не потеряется. Собранный сайт хранится 30 дней и подтянется сам. С другого устройства — введите код заказа в блоке «Мой заказ».</p></details>
-    <details><summary>Что если я оплатил, а сайт не включили?</summary><p>Напишите нам и назовите код заказа и номер чека. Найдём платёж по сумме — она уникальна, спутать её не с чем.</p></details>
+    <details><summary>Кто отвечает за то, что написано на сайте?</summary><p>Вы. Мы размещаем ровно те сведения, которые вы указали: услуги, цены, часы работы. Проверьте их перед оплатой — за достоверность отвечает владелец бизнеса. Если ваша деятельность требует лицензии, указывать её данные на сайте тоже ваша задача.</p></details>
+    <details><summary>А если сервис закроется — что будет с моим сайтом?</summary><p>Сайт перестанет открываться по нашей ссылке. Но файл вашего сайта мы отдадим по запросу в любой момент, и разместить его самому можно бесплатно за пару минут — <a href="/fayl.html" style="color:var(--ac);font-weight:600">вот инструкция</a>. Ничего не пропадёт.</p></details>
+    <details><summary>Как быстро включат сайт после оплаты?</summary><p>Обычно в течение нескольких часов в рабочее время — платёж проверяется вручную. В оферте указан предельный срок 10 рабочих дней: он нужен на случай, если мы окажемся недоступны, а не потому, что мы столько ждём. Как только платёж подтвердят, ссылка появится на странице сама.</p></details>
+    <details><summary>Что если я оплатил, а сайт не включили?</summary><p><a href="#help" style="color:var(--ac);font-weight:700">Напишите нам</a> и назовите код заказа и номер чека. Найдём платёж по сумме — она уникальна, спутать её не с чем.</p></details>
   </div>
 </div></section>
 
@@ -316,9 +380,26 @@
   <a class="btn lg" href="#build">Собрать сайт</a>
 </div></div></section>
 
-<footer class="foot"><div class="w foot-in">
-  <span>WeDesign · сайты для бизнеса Казахстана</span>
-  <span class="micro">Оплата через Kaspi. Проверка платежей ручная.</span>
+<a class="help" id="helpBtn" href="#" target="_blank" rel="noopener" hidden aria-label="Написать в поддержку">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-1.5-.6-3.4-1.7-4.9-3.8-.6-.8-1-1.7-1.1-2.5-.1-.8.2-1.5.6-1.9.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.4.7 1 1.3 1.6 1.8.6.4 1.1.6 1.3.7.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg>
+  <span>Помощь</span>
+</a>
+
+<footer class="foot"><div class="w">
+  <div class="foot-in" style="margin-bottom:16px">
+    <span><b style="color:var(--ink)">WeDesign</b> · сайты для бизнеса Казахстана</span>
+    <span class="micro">
+      <a href="#help" style="color:var(--ac);font-weight:600">Помощь</a> ·
+      <a href="/fayl.html" style="color:var(--ac);font-weight:600">Файл сайта</a> ·
+      <a href="/oferta.html" style="color:var(--ac);font-weight:600">Оферта</a> ·
+      <a href="/politika.html" style="color:var(--ac);font-weight:600">Персональные данные</a>
+    </span>
+  </div>
+  <div class="micro" style="border-top:1px solid var(--line);padding-top:16px;line-height:1.7">
+    ИП «Б.А.С.Т.А. PAY GROUP», ИИН 880528400138<br>
+    Республика Казахстан, г. Алматы · Телефон и WhatsApp: +7 707 111 81 52<br>
+    Оплата через Kaspi. Проверка платежей ручная. Автосписаний нет.
+  </div>
 </div></footer>
 
 <script src="/assets/app.js"></script>
