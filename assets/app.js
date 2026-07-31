@@ -54,56 +54,42 @@
     if (e.target.tagName === 'A') { menu.classList.remove('on'); document.body.style.overflow = ''; }
   });
 
-  /* ═══════════ бегущая строка ═══════════ */
+  /* ═══════════ тикер ДНК под полем ввода ═══════════ */
 
-  var WORDS = ['барбершоп','кофейня','автосервис','стоматология','студия ногтей','пекарня',
-    'фитнес-зал','цветочная лавка','детский центр','ремонт телефонов','химчистка','салон красоты'];
-  var line = WORDS.map(function (w) { return '<b>' + w + '</b><i>✦</i>'; }).join('');
-  $('marq').innerHTML = line + line;
-
-  /* ═══════════ сигнатура: живая ДНК ═══════════ */
-
-  var DEMO = [
-    { bg:'#0B0D14', tx:'#F1F4FA', ac:'#5B8CFF', f:"'Unbounded',sans-serif",       cat:'Барбершоп · Алматы',        t:'Стрижка без ожидания',        b:'Записаться' },
-    { bg:'#FFF9F2', tx:'#1C1917', ac:'#B45309', f:"'Playfair Display',serif",     cat:'Кофейня · Астана',          t:'Кофе, который помнят',        b:'Смотреть меню' },
-    { bg:'#F2F7F3', tx:'#10231A', ac:'#0F8A5F', f:"'Oswald',sans-serif",          cat:'Автосервис · Шымкент',      t:'Диагностика за 40 минут',     b:'Записать авто' },
-    { bg:'#0A0714', tx:'#F3EFFC', ac:'#A78BFA', f:"'Yeseva One',serif",           cat:'Студия ногтей · Алматы',    t:'Маникюр по записи',           b:'Выбрать время' },
-    { bg:'#FBF8F1', tx:'#1F2933', ac:'#1D4ED8', f:"'Jost',sans-serif",            cat:'Стоматология · Караганда',  t:'Лечим без страха',            b:'На приём' },
-    { bg:'#050B12', tx:'#EAF6FA', ac:'#2FE0B0', f:"'Unbounded',sans-serif",       cat:'Доставка еды · Актобе',     t:'Обед приедет за 30 минут',    b:'Заказать' },
-    { bg:'#FDF5F6', tx:'#26131A', ac:'#BE185D', f:"'Playfair Display',serif",     cat:'Пекарня · Тараз',           t:'Хлеб из печи в семь утра',    b:'Смотреть' }
-  ];
-
-  var strip = $('dnaStrip');
-  for (var k = 0; k < 24; k++) strip.appendChild(document.createElement('i'));
-
-  function hex() { return Math.floor(Math.random() * 16).toString(16).toUpperCase(); }
-
-  function shuffleDNA(v) {
-    var bars = strip.children;
-    for (var i = 0; i < bars.length; i++) {
-      var r = Math.random();
-      bars[i].style.background = r > 0.72 ? v.ac : (r > 0.48 ? v.tx : '#FFFFFF14');
-    }
-    var screen = $('dnaScreen');
-    screen.style.background = v.bg;
-    screen.style.color = v.tx;
-    $('dnaCat').style.color = v.ac;
-    $('dnaCat').textContent = v.cat;
-    $('dnaTitle').style.fontFamily = v.f;
-    $('dnaTitle').textContent = v.t;
-    var btn = $('dnaBtn');
-    btn.textContent = v.b;
-    btn.style.background = v.ac;
-    btn.style.color = v.bg;
-    btn.style.borderRadius = [0, 4, 12, 22, 999][Math.floor(Math.random() * 5)] + 'px';
-    $('dnaCode').textContent = 'DNA-' + hex() + hex() + hex() + hex() + hex() + hex();
+  var HEX = '0123456789ABCDEF';
+  function randCode() {
+    var out = 'DNA-';
+    for (var n = 0; n < 6; n++) out += HEX[Math.floor(Math.random() * 16)];
+    return out;
   }
-
-  shuffleDNA(DEMO[0]);
   if (!reduce) {
-    var idx = 0;
-    setInterval(function () { idx = (idx + 1) % DEMO.length; shuffleDNA(DEMO[idx]); }, 2900);
+    setInterval(function () {
+      var el = $('dnaTicker'), n = 0;
+      var id = setInterval(function () {
+        el.textContent = randCode();
+        if (++n > 6) clearInterval(id);
+      }, 60);
+    }, 3600);
   }
+
+  /* ═══════════ подсказки под полем ═══════════ */
+
+  var SAMPLE = 'Мужской барбершоп на три кресла в Алмалинском районе. Стрижки, бороды, детские. ' +
+    'Работаем по записи, но берём и без неё, если есть окно. Мастера с опытом от пяти лет, у каждого своё направление.';
+
+  $('btnExample').addEventListener('click', function () {
+    var d = $('fDescription');
+    d.value = SAMPLE;
+    d.dispatchEvent(new Event('input'));
+    if (!$('fName').value.trim()) $('fName').value = 'Barber Loft';
+    if (!$('fCategory').value.trim()) $('fCategory').value = 'барбершоп';
+    d.focus();
+  });
+
+  $('btnAddPhotos').addEventListener('click', function () {
+    $('build').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(function () { $('fPhotos').focus(); }, 500);
+  });
 
   /* ═══════════ часы работы ═══════════ */
 
@@ -227,7 +213,9 @@
     if (payload.description.length < 40)
       return show(err, 'Описание слишком короткое. Напишите 3-4 предложения: что делаете, для кого, чем отличаетесь.');
 
+    var hero = $('btnHero');
     btn.disabled = true;
+    hero.disabled = true;
     btn.textContent = 'Собираю…';
     try {
       var data = await api('/api/generate', payload);
@@ -238,17 +226,39 @@
       $('resultDna').textContent = data.dnaCode;
       $('preview').srcdoc = data.html;
       $('result').hidden = false;
+      // Телефон человек уже вписал выше — не спрашиваем второй раз.
+      if (!$('fContact').value.trim())
+        $('fContact').value = $('fWhatsapp').value.trim() || $('fPhone').value.trim();
       $('genHint').textContent = 'Осталось бесплатных сборок сегодня: ' + data.left;
       $('result').scrollIntoView({ behavior: 'smooth' });
     } catch (e) {
       show(err, e.message);
     } finally {
       btn.disabled = false;
+      hero.disabled = false;
       btn.textContent = 'Собрать сайт';
     }
   }
 
   $('btnGenerate').addEventListener('click', generate);
+
+  // Кнопка в первом экране: если короткие поля ещё пустые — ведём к ним,
+  // а не ругаемся непонятной ошибкой.
+  $('btnHero').addEventListener('click', function () {
+    if (desc.value.trim().length < 40) {
+      desc.focus();
+      return;
+    }
+    if (!$('fName').value.trim() || !$('fCity').value.trim() || !$('fCategory').value.trim()) {
+      $('build').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(function () {
+        show($('genError'), 'Осталось указать название, город и сферу — и собираем.');
+        ($('fName').value.trim() ? $('fCategory') : $('fName')).focus();
+      }, 400);
+      return;
+    }
+    generate();
+  });
   $('btnRegen').addEventListener('click', generate);
 
   /* ═══════════ заказ и оплата ═══════════ */
@@ -263,6 +273,56 @@
       var m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
       $('payTimer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
     }, 1000);
+  }
+
+  var watchId = null;
+  var watchLeft = 0;
+
+  // Пока владелец сверяет платёж, страница сама тихо спрашивает статус.
+  // Клиенту не нужно ничего обновлять и никуда возвращаться.
+  function watchOrder(code) {
+    stopWatch();
+    watchLeft = 40; // около двадцати минут
+    async function tick() {
+      if (watchLeft-- <= 0) return stopWatch();
+      try {
+        var r = await fetch('/api/status?code=' + encodeURIComponent(code));
+        var d = await r.json();
+        if (!d.ok) return;
+        if (d.status === 'paid' && d.publicUrl) {
+          stopWatch();
+          clearInterval(timerId);
+          $('pay').hidden = true;
+          showDone(d);
+        } else if (d.status === 'rejected') {
+          stopWatch();
+          show($('claimMsg'), 'Платёж не подтверждён' + (d.note ? ': ' + d.note : '') + '. Напишите нам, разберёмся.');
+        }
+      } catch (e) { /* сети нет — попробуем в следующий раз */ }
+    }
+    watchId = setInterval(tick, 30000);
+    document.addEventListener('visibilitychange', onVisible);
+  }
+
+  function onVisible() { if (!document.hidden && watchId && order) fetchOnce(); }
+
+  async function fetchOnce() {
+    try {
+      var r = await fetch('/api/status?code=' + encodeURIComponent(order.code));
+      var d = await r.json();
+      if (d.ok && d.status === 'paid' && d.publicUrl) {
+        stopWatch();
+        clearInterval(timerId);
+        $('pay').hidden = true;
+        showDone(d);
+      }
+    } catch (e) {}
+  }
+
+  function stopWatch() {
+    if (watchId) clearInterval(watchId);
+    watchId = null;
+    document.removeEventListener('visibilitychange', onVisible);
   }
 
   function openPay(o) {
@@ -285,21 +345,25 @@
 
   $('btnTake').addEventListener('click', async function () {
     if (!draftId) return;
-    var name = prompt('Как вас зовут? Имя и фамилия — они должны совпасть с именем в Kaspi.');
-    if (!name) return;
-    var phone = prompt('Ваш телефон в формате +7 7XX XXX XX XX');
-    if (!phone) return;
+    var err = $('takeError');
+    err.hidden = true;
+
+    var phone = $('fContact').value.trim();
+    if (phone.replace(/\D/g, '').length < 10) {
+      $('fContact').focus();
+      return show(err, 'Впишите телефон в формате +7 7XX XXX XX XX — по нему мы свяжемся, если с платежом что-то не сойдётся.');
+    }
 
     var btn = this;
     btn.disabled = true;
     btn.textContent = 'Бронирую сумму…';
     try {
-      var made = await api('/api/order', { draftId: draftId, contactName: name, contactPhone: phone });
+      var made = await api('/api/order', { draftId: draftId, contactPhone: phone });
       STORE.set('order', made.code);
       openPay(made);
       $('pay').scrollIntoView({ behavior: 'smooth' });
     } catch (e) {
-      alert(e.message);
+      show(err, e.message);
     } finally {
       btn.disabled = false;
       btn.textContent = 'Забрать сайт';
@@ -320,12 +384,33 @@
         amountPaid: Number(String($('cAmount').value).replace(/\D/g, '')),
         paidAt: $('cPaidAt').value
       });
-      show(msg, data.message + ' Сохраните код заказа: ' + order.code, true);
+      show(msg, data.message + ' Не закрывайте страницу — как только платёж подтвердят, ссылка на сайт появится здесь сама. Код заказа на всякий случай: ' + order.code, true);
+      watchOrder(order.code);
     } catch (e) {
       show(msg, e.message);
     } finally {
       btn.disabled = false;
     }
+  });
+
+  /* ═══════════ готовый сайт ═══════════ */
+
+  function showDone(data) {
+    var url = location.origin + data.publicUrl;
+    $('doneUrl').textContent = url;
+    $('doneUrl').href = url;
+    $('btnOpenSite').href = url;
+    $('doneNote').textContent =
+      'Нужно поправить текст или добавить фотографии — напишите нам и назовите код заказа ' + data.code + '.';
+    $('done').hidden = false;
+    $('done').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  $('btnCopyUrl').addEventListener('click', function () {
+    var btn = this;
+    function done() { btn.textContent = 'Скопирована'; setTimeout(function () { btn.textContent = 'Скопировать ссылку'; }, 1800); }
+    if (navigator.clipboard) navigator.clipboard.writeText($('doneUrl').textContent).then(done, done);
+    else done();
   });
 
   /* ═══════════ статус заказа ═══════════ */
@@ -356,15 +441,7 @@
         openPay(data);
         $('pay').scrollIntoView({ behavior: 'smooth' });
       }
-      if (data.html) {
-        var link = document.createElement('a');
-        link.href = URL.createObjectURL(new Blob([data.html], { type: 'text/html' }));
-        link.download = code + '.html';
-        link.textContent = 'Скачать файл сайта';
-        link.style.cssText = 'display:inline-block;margin-top:12px;font-weight:700;color:var(--ac)';
-        out.appendChild(document.createElement('br'));
-        out.appendChild(link);
-      }
+      if (data.status === 'paid' && data.publicUrl) showDone(data);
     } catch (e) {
       show(out, e.message || 'Заказ не найден');
     }
@@ -398,10 +475,10 @@
         var s2 = await r2.json();
         if (s2.ok && (s2.status === 'awaiting_payment' || s2.status === 'claimed')) {
           openPay(s2);
+          if (s2.status === 'claimed') watchOrder(s2.code);
         } else if (s2.ok && s2.status === 'paid') {
           $('sCode').value = s2.code;
-          $('restore').hidden = false;
-          $('restore').textContent = 'Ваш сайт оплачен и опубликован. Ссылка — в блоке «Мой заказ» по коду ' + s2.code + '.';
+          if (s2.publicUrl) showDone(s2);
         } else {
           STORE.del('order');
         }

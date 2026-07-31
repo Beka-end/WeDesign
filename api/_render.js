@@ -49,9 +49,9 @@ const FONTS = [
   { d:'Golos Text',        b:'Golos Text',     dw:700, s:'-.04em',  t:'none' },
 ];
 
-const HEROES  = ['mesh','sticky','marquee','overlap','bigtype','rule','gradient','luxe'];
+const HEROES  = ['mesh','sticky','marquee','overlap','bigtype','rule','gradient','luxe','glass','sky'];
 const MOTION  = ['up','mask','stagger','scale'];
-const SHAPE   = [0, 4, 12, 22, 999];
+const SHAPE   = [0, 4, 12, 20, 28, 999];
 const NAVS    = ['float', 'plain', 'rule'];
 const SECTIONS = ['stats','services','about','process','gallery','reviews','faq'];
 
@@ -179,9 +179,9 @@ ${dna.nv==='rule' ? '.links a{border-radius:0;border-bottom:1.5px solid transpar
 .g{display:grid;gap:clamp(14px,1.6vw,22px)}
 .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.card{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:clamp(24px,2.6vw,34px);position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.2,.7,.3,1),border-color .3s}
+.card{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:clamp(24px,2.6vw,34px);position:relative;overflow:hidden;box-shadow:0 1px 2px ${p.mode==='dark'?'#00000038':'#0000000A'},0 12px 30px ${p.mode==='dark'?'#00000038':'#0000000D'};transition:transform .3s cubic-bezier(.2,.7,.3,1),border-color .3s,box-shadow .3s}
 .s.tint .card{background:var(--bg)}
-.card:hover{transform:translateY(-5px);border-color:${p.ac}66}
+.card:hover{transform:translateY(-5px);border-color:${p.ac}66;box-shadow:0 2px 4px ${p.mode==='dark'?'#00000045':'#0000000F'},0 26px 60px ${p.mode==='dark'?'#00000052':'#00000017'}}
 .card:before{content:'';position:absolute;inset:0;background:linear-gradient(140deg,${p.ac}12,transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
 .card:hover:before{opacity:1}
 .card p{color:var(--mu);margin:0;font-size:15.5px}
@@ -248,6 +248,13 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .wa svg{width:28px;height:28px}
 .bar{position:fixed;top:0;left:0;height:2.5px;background:linear-gradient(90deg,var(--g1),var(--g2));z-index:120;width:0}
 
+.glass{background:${p.mode==='dark'?'#FFFFFF0F':'#FFFFFFB8'};backdrop-filter:blur(22px) saturate(1.3);border:1px solid ${p.mode==='dark'?'#FFFFFF26':'#FFFFFF'};border-radius:calc(var(--r) + 10px);padding:clamp(30px,4.4vw,64px);box-shadow:0 2px 6px #00000012,0 40px 90px ${p.mode==='dark'?'#00000059':'#0000001F'}}
+.sky{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.sky .c{position:absolute;border-radius:50%;background:${p.mode==='dark'?'#FFFFFF14':'#FFFFFF'};filter:blur(42px)}
+.sky .c:nth-child(1){width:46vw;height:26vw;top:6vw;left:-6vw;opacity:${p.mode==='dark'?'.10':'.85'}}
+.sky .c:nth-child(2){width:38vw;height:20vw;top:1vw;right:-4vw;opacity:${p.mode==='dark'?'.08':'.7'}}
+.sky .c:nth-child(3){width:30vw;height:16vw;top:16vw;left:34vw;opacity:${p.mode==='dark'?'.06':'.55'}}
+.hills{position:absolute;left:0;right:0;bottom:-1px;z-index:1;pointer-events:none}
 .rv{opacity:0;transition:opacity .8s cubic-bezier(.2,.7,.3,1),transform .8s cubic-bezier(.2,.7,.3,1),clip-path .9s cubic-bezier(.2,.7,.3,1);transition-delay:var(--d,0ms)}
 ${dna.m==='up'      ? '.rv{transform:translateY(34px)}' : ''}
 ${dna.m==='mask'    ? '.rv{clip-path:inset(0 0 100% 0);transform:translateY(14px)}' : ''}
@@ -302,6 +309,10 @@ function marquee(d){
   const line = list.map(function(w){ return `<b>${esc(w)}</b><i>✦</i>`; }).join('');
   return `<div class="marq"><div class="t">${line}${line}</div></div>`;
 }
+
+// Первый цвет градиента текущей палитры — нужен внутри разметки первого экрана.
+var CURRENT_PAL = null;
+function p_g1(){ return CURRENT_PAL ? CURRENT_PAL.g1 : '#000000'; }
 
 function hero(dna, d){
   const kind = HEROES[dna.h];
@@ -369,6 +380,26 @@ function hero(dna, d){
         <a class="btn" style="background:#fff;color:#111" href="#contacts"><span>${esc(d.ctaText||'Записаться')}</span></a>
         ${d.phone?`<a class="btn o" style="color:#fff;border-color:#FFFFFF66" href="tel:${esc(d.phone)}"><span>${esc(d.phone)}</span></a>`:''}
       </div></div></header>`;
+
+  if (kind === 'glass')
+    return `<header style="${pad};position:relative;background:linear-gradient(165deg,${p_g1(d)}22,transparent 55%)">${mesh(true)}<div class="w">
+      <div class="glass">${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+      <p class="lead rv" style="--d:140ms">${esc(d.subheadline)}</p>
+      <div class="rv" style="--d:220ms;margin:30px 0 20px;display:flex;gap:14px;flex-wrap:wrap">${cta}${tel}</div>
+      <div class="rv" style="--d:300ms">${pill}</div></div></div></header>`;
+
+  if (kind === 'sky')
+    return `<header style="padding:clamp(130px,17vw,200px) 0 0;position:relative;overflow:hidden;background:linear-gradient(180deg,${p_g1(d)}26,transparent 62%)">
+      <div class="sky"><i class="c"></i><i class="c"></i><i class="c"></i></div>
+      <div class="w" style="text-align:center;max-width:940px;padding-bottom:clamp(80px,11vw,150px)">
+      ${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+      <p class="lead rv" style="--d:140ms;margin:0 auto 32px">${esc(d.subheadline)}</p>
+      <div class="rv" style="--d:220ms;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">${cta}${tel}</div>
+      <div class="rv" style="--d:300ms;margin-top:30px">${pill}</div></div>
+      <svg class="hills" viewBox="0 0 1440 140" preserveAspectRatio="none" aria-hidden="true" style="height:clamp(60px,9vw,130px);width:100%">
+        <path d="M0 88c220-52 400 26 640 10s420-74 800-26v68H0z" fill="var(--surf)" opacity=".7"/>
+        <path d="M0 116c260-40 430 14 700 2s470-56 740-14v36H0z" fill="var(--surf)"/>
+      </svg></header>`;
 
   return `<header style="padding:clamp(150px,20vw,240px) 0 clamp(80px,10vw,130px);position:relative"><div class="w n" style="text-align:center">
     ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(34px,5.4vw,64px)">${esc(d.headline)}</h1>
@@ -532,6 +563,7 @@ function render(data, dna, opts){
   const o = opts || {};
   const p = PALETTES[dna.p];
   const f = FONTS[dna.f];
+  CURRENT_PAL = p;
   const h = normalizeHours(data.hours);
   const d = data;
 

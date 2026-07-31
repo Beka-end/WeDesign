@@ -85,6 +85,16 @@ const store = {
     if (n === 1 && ttlSeconds) await cmd(['EXPIRE', key, String(ttlSeconds)]);
     return n;
   },
+  // Вернуть сборку обратно: если запрос не про бизнес, наказывать человека не за что.
+  async decr(key) {
+    if (!hasKV) {
+      const rec = memAlive(key);
+      if (!rec) return 0;
+      rec.v = Math.max(0, Number(rec.v) - 1);
+      return rec.v;
+    }
+    return await cmd(['DECR', key]);
+  },
   async sadd(key, member) {
     if (!hasKV) {
       const s = memS.get(key) || new Set();

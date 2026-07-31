@@ -133,9 +133,9 @@
     var checklist = o.status === 'claimed'
       ? '<div class="steps-check">Проверьте в Kaspi по порядку:<br>' +
         '1. Найдите поступление ровно на <b>' + tenge(o.amount) + ' ₸</b> около ' + esc(c.paidAt || 'указанного времени') + '.<br>' +
-        '2. Сверьте отправителя: клиент указал <b>' + esc(c.payerName) + '</b>.<br>' +
-        '3. Сверьте номер чека: <b>' + esc(c.receiptNo) + '</b>.<br>' +
-        'Совпало всё три — подтверждайте. Что-то не сходится — отклоняйте.</div>'
+        '2. Сверьте отправителя: клиент назвался <b>' + esc(c.payerName) + '</b>. Kaspi покажет имя и первую букву фамилии — полной фамилии там не будет, это нормально.<br>' +
+        '3. Чек <b>' + esc(c.receiptNo) + '</b> — он нужен против повторов: если этот номер уже был в другом заказе, карточка станет оранжевой.<br>' +
+        'Главный признак — сумма. Совпала сумма и примерно совпало время — платёж ваш.</div>'
       : '';
 
     return '' +
@@ -146,8 +146,7 @@
         '</div>' +
         '<div class="kv">' +
           '<div><span>Сумма к оплате</span><b class="mono">' + tenge(o.amount) + ' ₸</b></div>' +
-          '<div><span>Клиент</span><b>' + esc(o.contactName) + '</b></div>' +
-          '<div><span>Телефон</span><b>' + esc(o.contactPhone) + '</b></div>' +
+          '<div><span>Телефон для связи</span><b>' + esc(o.contactPhone) + '</b></div>' +
           '<div><span>Заказ создан</span><b style="font-size:14px">' + when(o.createdAt) + '</b></div>' +
           (c.payerName ? '<div><span>Плательщик по чеку</span><b>' + esc(c.payerName) + '</b></div>' : '') +
           (c.receiptNo ? '<div><span>Номер чека</span><b class="mono">' + esc(c.receiptNo) + '</b></div>' : '') +
@@ -158,6 +157,14 @@
         checklist +
         '<div class="row-actions">' +
           '<button class="btn btn-ghost btn-sm" data-act="preview" data-code="' + o.code + '">Открыть сайт</button>' +
+          (o.status === 'paid' && o.slug && o.contactPhone
+            ? '<a class="btn btn-sm" target="_blank" rel="noopener" href="https://wa.me/' +
+              encodeURIComponent(String(o.contactPhone).replace(/\D/g, '')) +
+              '?text=' + encodeURIComponent(
+                'Здравствуйте! Ваш сайт готов и работает: ' + location.origin + '/s/' + o.slug +
+                '\nЭту ссылку можно ставить в Instagram, 2ГИС и на визитку. Заказ ' + o.code + '.'
+              ) + '">Отправить ссылку в WhatsApp</a>'
+            : '') +
           (o.status !== 'paid' ? '<button class="btn btn-sm" data-act="confirm" data-code="' + o.code + '">Платёж получен, опубликовать</button>' : '') +
           (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="unpublish" data-code="' + o.code + '">Снять с публикации</button>' : '') +
           (o.status !== 'paid' && o.status !== 'rejected' ? '<button class="btn btn-ghost btn-sm" data-act="reject" data-code="' + o.code + '">Платежа нет</button>' : '') +

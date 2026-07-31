@@ -21,8 +21,10 @@ const handler = async (req, res) => {
   if (!order) return L.fail(res, 404, 'Заказ с таким кодом не найден');
   if (order.status === 'paid') return L.send(res, 200, { ok: true, status: 'paid' });
 
-  if (!payerName || payerName.split(/\s+/).length < 2)
-    return L.fail(res, 400, 'Впишите имя и фамилию отправителя ровно так, как в чеке Kaspi');
+  // Kaspi показывает получателю только имя и первую букву фамилии: «Асхат Н.»
+  // Полное ФИО просить бессмысленно — владельцу не с чем будет сравнивать.
+  if (!/^[^\s]{2,}\s+[^\s]/.test(payerName))
+    return L.fail(res, 400, 'Впишите отправителя так, как его показывает Kaspi: имя и первая буква фамилии, например «Асхат Н.»');
   if (receiptNo.length < 4) return L.fail(res, 400, 'Впишите номер чека из Kaspi');
 
   const risk = [];
@@ -32,9 +34,13 @@ const handler = async (req, res) => {
   const receiptFresh = await L.store.sadd('wd:receipts', receiptNo);
   if (receiptFresh !== 1) risk.push('Такой номер чека уже использовался в другом заказе');
 
-  const nameLooksLikeContact =
-    payerName.toLowerCase().split(/\s+/).some((w) => order.contactName.toLowerCase().includes(w));
-  if (!nameLooksLikeContact) risk.push('Имя плательщика не совпадает с именем в заказе');
+  // За человека часто платит родственник — само по себе это не тревога.
+  // Сверяем имя, только если оно уже называлось раньше в этом заказе.
+  if (order.contactName) {
+    const known = order.contactName.toLowerCase();
+    const same = payerName.toLowerCase().split(/\s+/).some((w) => known.includes(w));
+    if (!same) risk.push('Имя плательщика не совпадает с именем в заказе');
+  }
 
   order.status = 'claimed';
   order.claim = { payerName, receiptNo, paidAt, amountPaid, at: Date.now(), ip };

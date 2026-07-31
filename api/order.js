@@ -13,12 +13,13 @@ const handler = async (req, res) => {
   if (!rate.ok) return L.fail(res, 429, 'Слишком много заказов с этого устройства. Напишите нам в WhatsApp');
 
   const draftId = L.clean(body.draftId, 20);
-  const contactName = L.clean(body.contactName, 60);
   const contactPhone = L.clean(body.contactPhone, 30);
 
+  // Имя при заказе не спрашиваем: платёж опознаётся по уникальной сумме,
+  // а имя плательщика придёт вместе с чеком. Телефон — только для связи.
   if (!draftId) return L.fail(res, 400, 'Сначала соберите сайт');
-  if (!contactName || contactPhone.replace(/\D/g, '').length < 10)
-    return L.fail(res, 400, 'Укажите имя и телефон в формате +7 7XX XXX XX XX');
+  if (contactPhone.replace(/\D/g, '').length < 10)
+    return L.fail(res, 400, 'Укажите телефон в формате +7 7XX XXX XX XX');
 
   const draft = await L.getJSON(`wd:draft:${draftId}`);
   if (!draft) return L.fail(res, 404, 'Черновик устарел. Соберите сайт заново');
@@ -54,14 +55,13 @@ const handler = async (req, res) => {
     suffix,
     amount: base + suffix,
     status: 'awaiting_payment',
-    contactName,
     contactPhone,
     ip,
     createdAt: Date.now(),
     expiresAt: Date.now() + windowMin * 60000,
     business: draft.data.name,
     city: draft.data.city,
-    risk: [],
+    risk: (draft.flags || []).slice(),
   };
 
   await L.setJSON(`wd:order:${order.code}`, order, 120 * L.DAY);
