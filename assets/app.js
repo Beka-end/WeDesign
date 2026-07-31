@@ -460,7 +460,7 @@
         var r = await fetch('/api/status?code=' + encodeURIComponent(code));
         var d = await r.json();
         if (!d.ok) return;
-        if (d.status === 'paid' && d.publicUrl) {
+        if (d.status === 'paid') {
           stopWatch();
           clearInterval(timerId);
           $('pay').hidden = true;
@@ -482,7 +482,7 @@
     try {
       var r = await fetch('/api/status?code=' + encodeURIComponent(order.code));
       var d = await r.json();
-      if (d.ok && d.status === 'paid' && d.publicUrl) {
+      if (d.ok && d.status === 'paid') {
         stopWatch();
         clearInterval(timerId);
         $('pay').hidden = true;
@@ -583,10 +583,6 @@
   /* ═══════════ готовый сайт ═══════════ */
 
   function showDone(data) {
-    var url = location.origin + data.publicUrl;
-    $('doneUrl').textContent = url;
-    $('doneUrl').href = url;
-    $('btnOpenSite').href = url;
     $('btnDownload').href = '/api/download?code=' + encodeURIComponent(data.code);
     $('doneNote').innerHTML =
       'Нужно поправить текст или добавить фотографии — ' +
@@ -594,24 +590,17 @@
         ? '<a href="' + waLink('Здравствуйте! Хочу поправить сайт по заказу ' + data.code + '.') +
           '" target="_blank" rel="noopener" style="color:var(--ac);font-weight:700">напишите нам в WhatsApp</a>'
         : 'напишите нам') +
-      ' и назовите код заказа ' + data.code + '.';
+      ' и назовите код заказа ' + data.code + '. Соберём заново и пришлём новый файл.';
     $('done').hidden = false;
     $('done').scrollIntoView({ behavior: 'smooth' });
   }
-
-  $('btnCopyUrl').addEventListener('click', function () {
-    var btn = this;
-    function done() { btn.textContent = 'Скопирована'; setTimeout(function () { btn.textContent = 'Скопировать ссылку'; }, 1800); }
-    if (navigator.clipboard) navigator.clipboard.writeText($('doneUrl').textContent).then(done, done);
-    else done();
-  });
 
   /* ═══════════ статус заказа ═══════════ */
 
   var LABEL = {
     awaiting_payment: 'Ждём оплату',
     claimed: 'Платёж на проверке',
-    paid: 'Оплачено, сайт опубликован',
+    paid: 'Оплачено — файл готов к скачиванию',
     rejected: 'Отклонено',
     expired: 'Бронь истекла — соберите заказ заново'
   };
@@ -626,7 +615,6 @@
       var data = parse(res, await res.text());
       if (!data.ok) throw new Error(data.error);
       var text = LABEL[data.status] || data.status;
-      if (data.publicUrl) text += ' → ' + location.origin + data.publicUrl;
       if (data.note) text += ' · ' + data.note;
       show(out, text, data.status === 'paid');
       if (data.status === 'awaiting_payment' || data.status === 'claimed') {
@@ -634,7 +622,7 @@
         openPay(data);
         $('pay').scrollIntoView({ behavior: 'smooth' });
       }
-      if (data.status === 'paid' && data.publicUrl) showDone(data);
+      if (data.status === 'paid') showDone(data);
     } catch (e) {
       show(out, e.message || 'Заказ не найден');
     }
@@ -671,7 +659,7 @@
           if (s2.status === 'claimed') watchOrder(s2.code);
         } else if (s2.ok && s2.status === 'paid') {
           $('sCode').value = s2.code;
-          if (s2.publicUrl) showDone(s2);
+          showDone(s2);
         } else {
           STORE.del('order');
         }

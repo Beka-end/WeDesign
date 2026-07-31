@@ -28,16 +28,13 @@ const handler = async (req, res) => {
     amount: order.amount,
     expiresAt: order.expiresAt,
     business: order.business,
-    slug: order.slug || null,
+    fileReady: order.status === 'paid',
     note: order.note || null,
     kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
     support: L.contacts(),
   };
 
-  // Клиенту отдаём ссылку на живой сайт, а не файл: файл ему некуда девать.
-  if (order.status === 'paid') {
-    out.publicUrl = order.slug ? `/s/${order.slug}` : null;
-  }
+
 
   return L.send(res, 200, out);
 };

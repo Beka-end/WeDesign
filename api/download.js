@@ -24,8 +24,9 @@ const handler = async (req, res) => {
   if (!draft)
     return L.fail(res, 404, 'Черновик уже удалён. Напишите нам, соберём файл вручную');
 
-  const name = (order.slug || L.slugify(order.business)) + '.html';
-  const html = R.render(draft.data, draft.dna, { preview: false });
+  const name = L.slugify(order.business) + '.html';
+  // standalone: копия для клиента, без подписи сервиса и без привязки к нам.
+  const html = R.render(draft.data, draft.dna, { preview: false, standalone: true });
 
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');

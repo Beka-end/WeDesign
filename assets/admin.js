@@ -85,7 +85,7 @@
   var LABEL = {
     awaiting_payment: 'ждёт оплату',
     claimed: 'на проверке',
-    paid: 'оплачено',
+    paid: 'оплачено, файл выдан',
     rejected: 'отклонено',
     expired: 'бронь истекла'
   };
@@ -154,7 +154,7 @@
           (c.payerName ? '<div><span>Плательщик по чеку</span><b>' + esc(c.payerName) + '</b></div>' : '') +
           (c.receiptNo ? '<div><span>Номер чека</span><b class="mono">' + esc(c.receiptNo) + '</b></div>' : '') +
           (c.amountPaid ? '<div><span>Заявленная сумма</span><b class="mono">' + tenge(c.amountPaid) + ' ₸</b></div>' : '') +
-          (o.slug ? '<div><span>Адрес сайта</span><b style="font-size:14px">/s/' + esc(o.slug) + '</b></div>' : '') +
+
           (o.terms && o.terms.verified
             ? '<div><span>Согласие с условиями</span><b style="font-size:13px">' +
               when(o.terms.at) + '<br><span class="mono" style="font-size:12px">' + esc(o.terms.id) + '</span>' +
@@ -179,8 +179,8 @@
                 '\nЭту ссылку можно ставить в Instagram, 2ГИС и на визитку. Заказ ' + o.code + '.'
               ) + '">Отправить ссылку в WhatsApp</a>'
             : '') +
-          (o.status !== 'paid' ? '<button class="btn btn-sm" data-act="confirm" data-code="' + o.code + '">Платёж получен, опубликовать</button>' : '') +
-          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="unpublish" data-code="' + o.code + '">Снять с публикации</button>' : '') +
+          (o.status !== 'paid' ? '<button class="btn btn-sm" data-act="confirm" data-code="' + o.code + '">Платёж получен, выдать файл</button>' : '') +
+          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="revoke" data-code="' + o.code + '">Отозвать файл</button>' : '') +
           (o.status !== 'paid' && o.status !== 'rejected' ? '<button class="btn btn-ghost btn-sm" data-act="reject" data-code="' + o.code + '">Платежа нет</button>' : '') +
         '</div>' +
       '</div>';
@@ -219,7 +219,7 @@
         a.click();
         document.body.removeChild(a);
         setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-        alert('Файл сохранён: ' + f.filename + '\n\nОтправьте его клиенту и дайте ссылку на инструкцию: ' + location.origin + '/fayl.html');
+        alert('Файл сохранён: ' + f.filename + '\n\nОбычно клиент скачивает его сам на сайте. Эта копия — если он потерял доступ.');
         return;
       }
       if (action === 'preview') {
@@ -230,10 +230,10 @@
         return;
       }
       if (action === 'confirm') {
-        if (!confirm('Вы своими глазами увидели этот платёж в Kaspi? Сайт станет публичным.')) return;
+        if (!confirm('Вы своими глазами увидели этот платёж в Kaspi? Клиент получит файл своего сайта.')) return;
       }
       var note = '';
-      if (action === 'reject' || action === 'unpublish') {
+      if (action === 'reject' || action === 'revoke') {
         note = prompt('Причина — её увидит клиент при проверке заказа:', 'Платёж на эту сумму не найден') || '';
       }
       await call({ action: action, code: code, note: note });

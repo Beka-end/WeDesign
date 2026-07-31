@@ -70,8 +70,8 @@ const handler = async (req, res) => {
     if (!draft) return L.fail(res, 404, 'Черновик уже удалён, файл собрать не из чего');
     return L.send(res, 200, {
       ok: true,
-      html: R.render(draft.data, draft.dna, { preview: false }),
-      filename: (order.slug || L.slugify(order.business)) + '.html',
+      html: R.render(draft.data, draft.dna, { preview: false, standalone: true }),
+      filename: L.slugify(order.business) + '.html',
       business: order.business,
     });
   }
@@ -90,20 +90,7 @@ const handler = async (req, res) => {
     const draft = await L.getJSON(`wd:draft:${order.draftId}`);
     if (!draft) return L.fail(res, 404, 'Черновик устарел, сайт нужно собрать заново');
 
-    if (!order.slug) {
-      let slug = L.slugify(order.business);
-      for (let i = 0; i < 25; i++) {
-        const candidate = i === 0 ? slug : `${slug}-${i + 1}`;
-        const fresh = await L.store.sadd('wd:slugs', candidate);
-        if (fresh === 1) {
-          slug = candidate;
-          break;
-        }
-      }
-      order.slug = slug;
-      await L.setJSON(`wd:site:${slug}`, { code: order.code, draftId: order.draftId }, 400 * L.DAY);
-    }
-
+    // Сайты у себя не размещаем: клиент получает файл и ставит его сам.
     order.status = 'paid';
     order.paidConfirmedAt = Date.now();
     order.note = '';
@@ -122,14 +109,11 @@ const handler = async (req, res) => {
     return L.send(res, 200, { ok: true, order });
   }
 
-  if (action === 'unpublish') {
-    if (order.slug) {
-      await L.store.del(`wd:site:${order.slug}`);
-      await L.store.srem('wd:slugs', order.slug);
-      order.slug = null;
-    }
+  // Отзыв доступа к файлу: клиент больше не сможет его скачать.
+  // Уже скачанный файл это, разумеется, не отменяет.
+  if (action === 'revoke') {
     order.status = 'rejected';
-    order.note = L.clean(body.note, 200) || 'Снят с публикации';
+    order.note = L.clean(body.note, 200) || 'Доступ к файлу отозван';
     await L.setJSON(`wd:order:${code}`, order, 120 * L.DAY);
     return L.send(res, 200, { ok: true, order });
   }
