@@ -225,7 +225,7 @@ module.exports = async (req, res) => {
   await L.setJSON(
     `wd:draft:${draftId}`,
     { data, dna, ip, createdAt: Date.now() },
-    7 * L.DAY
+    30 * L.DAY
   );
 
   return L.send(res, 200, {

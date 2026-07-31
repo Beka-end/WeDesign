@@ -11,6 +11,14 @@
   var order = null;
   var timerId = null;
 
+  // Память браузера: чтобы человек не потерял сайт, закрыв вкладку.
+  // В приватном режиме localStorage кидает ошибку — молча переживаем это.
+  var STORE = {
+    get: function (k) { try { return localStorage.getItem('wd_' + k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem('wd_' + k, v); } catch (e) {} },
+    del: function (k) { try { localStorage.removeItem('wd_' + k); } catch (e) {} }
+  };
+
   /* ═══════════ движение ═══════════ */
 
   var rv = document.querySelectorAll('.rv');
@@ -203,6 +211,9 @@
     try {
       var data = await api('/api/generate', payload);
       draftId = data.draftId;
+      STORE.set('draft', draftId);
+      STORE.del('order');
+      $('restore').hidden = true;
       $('resultDna').textContent = data.dnaCode;
       $('preview').srcdoc = data.html;
       $('result').hidden = false;
@@ -233,6 +244,24 @@
     }, 1000);
   }
 
+  function openPay(o) {
+    order = o;
+    $('payAmount').textContent = tenge(o.amount) + ' ₸';
+    $('payCode').textContent = o.code;
+    $('cAmount').value = o.amount;
+    $('kaspiLink').href = o.kaspiUrl || 'https://pay.kaspi.kz/pay/cwevqlzj';
+    $('pay').hidden = false;
+    startTimer(o.expiresAt);
+  }
+
+  $('btnCopy').addEventListener('click', function () {
+    var code = $('payCode').textContent;
+    var btn = this;
+    function done() { btn.textContent = 'Скопирован'; setTimeout(function () { btn.textContent = 'Скопировать код'; }, 1800); }
+    if (navigator.clipboard) navigator.clipboard.writeText(code).then(done, done);
+    else done();
+  });
+
   $('btnTake').addEventListener('click', async function () {
     if (!draftId) return;
     var name = prompt('Как вас зовут? Имя и фамилия — они должны совпасть с именем в Kaspi.');
@@ -244,13 +273,9 @@
     btn.disabled = true;
     btn.textContent = 'Бронирую сумму…';
     try {
-      order = await api('/api/order', { draftId: draftId, contactName: name, contactPhone: phone });
-      $('payAmount').textContent = tenge(order.amount) + ' ₸';
-      $('payCode').textContent = order.code;
-      $('cAmount').value = order.amount;
-      $('kaspiLink').href = order.kaspiUrl;
-      $('pay').hidden = false;
-      startTimer(order.expiresAt);
+      var made = await api('/api/order', { draftId: draftId, contactName: name, contactPhone: phone });
+      STORE.set('order', made.code);
+      openPay(made);
       $('pay').scrollIntoView({ behavior: 'smooth' });
     } catch (e) {
       alert(e.message);
@@ -305,6 +330,11 @@
       if (data.publicUrl) text += ' → ' + location.origin + data.publicUrl;
       if (data.note) text += ' · ' + data.note;
       show(out, text, data.status === 'paid');
+      if (data.status === 'awaiting_payment' || data.status === 'claimed') {
+        STORE.set('order', data.code);
+        openPay(data);
+        $('pay').scrollIntoView({ behavior: 'smooth' });
+      }
       if (data.html) {
         var link = document.createElement('a');
         link.href = URL.createObjectURL(new Blob([data.html], { type: 'text/html' }));
@@ -318,4 +348,43 @@
       show(out, e.message || 'Заказ не найден');
     }
   });
+
+  /* ═══════════ возврат к прошлой работе ═══════════ */
+
+  (async function restore() {
+    var savedDraft = STORE.get('draft');
+    var savedOrder = STORE.get('order');
+
+    if (savedDraft) {
+      try {
+        var r = await fetch('/api/draft?id=' + encodeURIComponent(savedDraft));
+        var d = await r.json();
+        if (d.ok) {
+          draftId = savedDraft;
+          $('resultDna').textContent = d.dnaCode;
+          $('preview').srcdoc = d.html;
+          $('result').hidden = false;
+          $('restore').hidden = false;
+        } else {
+          STORE.del('draft');
+        }
+      } catch (e) { /* сети нет — просто не восстанавливаем */ }
+    }
+
+    if (savedOrder) {
+      try {
+        var r2 = await fetch('/api/status?code=' + encodeURIComponent(savedOrder));
+        var s2 = await r2.json();
+        if (s2.ok && (s2.status === 'awaiting_payment' || s2.status === 'claimed')) {
+          openPay(s2);
+        } else if (s2.ok && s2.status === 'paid') {
+          $('sCode').value = s2.code;
+          $('restore').hidden = false;
+          $('restore').textContent = 'Ваш сайт оплачен и опубликован. Ссылка — в блоке «Мой заказ» по коду ' + s2.code + '.';
+        } else {
+          STORE.del('order');
+        }
+      } catch (e) { /* тихо */ }
+    }
+  })();
 })();

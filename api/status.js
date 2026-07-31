@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
     business: order.business,
     slug: order.slug || null,
     note: order.note || null,
+    kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
   };
 
   if (order.status === 'paid') {

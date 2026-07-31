@@ -23,6 +23,7 @@ api/claim.js
 api/status.js
 api/admin.js
 api/site.js
+api/draft.js
 primery/primer-1-barbershop.html
 primery/primer-2-kofeynya.html
 primery/primer-3-avtoservis.html
@@ -100,6 +101,9 @@ Vercel → Settings → **Environment Variables**. Ставьте на все с
   общий суточный потолок на весь сайт.
 - `api/_render.js` — сборка HTML сайта. **Верстает только сервер**: браузер
   клиента не может прислать свой HTML, потому что HTML у него никто не спрашивает.
+- `api/draft.js` — возврат к уже собранному сайту. Модель тут не вызывается:
+  человек закрыл вкладку и вернулся — платить второй раз не за что. Черновик
+  живёт 30 дней.
 - `api/admin.js` — панель. Пароль сверяется побайтово, вход выдаёт подписанный
   токен на 8 часов, 5 неудачных попыток подряд блокируют вход на 15 минут.
 - `api/_render.js` → `makeDNA()` — та самая «ДНК дизайна»: 18 палитр, 14 пар
