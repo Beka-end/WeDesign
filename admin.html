@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Панель WeDesign</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Golos+Text:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap&subset=cyrillic,latin">
+<link rel="stylesheet" href="/assets/style.css">
+<style>
+  .panel{max-width:1080px;margin:0 auto;padding:40px 22px 80px}
+  .login{max-width:400px;margin:14vh auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:32px}
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:26px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+  .order{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;margin-bottom:14px}
+  .order.hot{border-color:var(--ochre)}
+  .order-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+  .tag{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:5px 11px;border-radius:999px;background:#ffffff14;color:var(--muted)}
+  .tag.claimed{background:#f5a6232e;color:var(--ochre)}
+  .tag.paid{background:#35d6c42e;color:var(--teal)}
+  .tag.rejected{background:#ff7a6b2e;color:var(--danger)}
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:18px 0}
+  .kv span{display:block;font-size:12px;color:var(--muted)}
+  .kv b{font-size:16px;font-weight:600}
+  .risk{background:#ff7a6b1a;border:1px solid #ff7a6b55;border-radius:10px;padding:12px 16px;font-size:14.5px;margin:14px 0}
+  .risk ul{margin:6px 0 0;padding-left:18px}
+  .steps-check{background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:14.5px;color:var(--muted);margin:14px 0}
+  .steps-check b{color:var(--text)}
+  .row-actions{display:flex;gap:10px;flex-wrap:wrap}
+  dialog{background:var(--ink-2);color:var(--text);border:1px solid var(--line);border-radius:var(--r);padding:0;width:min(1000px,94vw);max-height:92vh}
+  dialog iframe{width:100%;height:76vh;border:0;background:#fff;display:block}
+  .dlg-bar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="login" id="loginBox">
+  <h2 style="font-size:24px">Панель WeDesign</h2>
+  <p class="micro" style="margin-bottom:20px">Вход только по паролю. Пароль хранится в переменных Vercel, в коде его нет.</p>
+  <label class="field"><span>Пароль</span><input type="password" id="pw" autocomplete="current-password"></label>
+  <button class="btn" id="btnLogin" style="width:100%">Войти</button>
+  <div class="notice" id="loginErr" hidden></div>
+</div>
+
+<div class="panel" id="panel" hidden>
+  <div class="bar">
+    <div>
+      <h2 style="font-size:26px;margin-bottom:4px">Заказы</h2>
+      <p class="micro" id="meta">—</p>
+    </div>
+    <div class="row-actions">
+      <a class="btn btn-ghost btn-sm" id="kaspiOpen" target="_blank" rel="noopener">Открыть Kaspi</a>
+      <button class="btn btn-ghost btn-sm" id="btnReload">Обновить</button>
+      <button class="btn btn-ghost btn-sm" id="btnLogout">Выйти</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="chip-btn" data-f="claimed">Ждут проверки</button>
+    <button class="chip-btn" data-f="awaiting_payment">Ждут оплату</button>
+    <button class="chip-btn" data-f="paid">Оплаченные</button>
+    <button class="chip-btn" data-f="all">Все</button>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-bar"><b class="mono" id="dlgTitle">—</b><button class="btn btn-ghost btn-sm" id="dlgClose">Закрыть</button></div>
+  <iframe id="dlgFrame" title="Предпросмотр сайта"></iframe>
+</dialog>
+
+<script src="/assets/admin.js"></script>
+</body>
+</html>
