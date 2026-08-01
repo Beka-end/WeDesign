@@ -179,6 +179,8 @@ p{margin:0 0 1em}
 .t-list li{padding:8px 0 8px 24px;position:relative}
 .t-list li:before{content:'✓';position:absolute;left:0;color:var(--ac);font-weight:800}
 .t-list b{color:var(--ink)}
+.t-note{font-size:13px;color:var(--mu);line-height:1.5;margin:0 0 16px;padding-top:14px;border-top:1px solid var(--line)}
+.t-note a{color:var(--ac);font-weight:600}
 .tariff .btn{width:100%;margin-top:auto}
 
 /* ——— выбор тарифа при заказе ——— */
