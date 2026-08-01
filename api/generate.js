@@ -232,13 +232,13 @@ function keepRealStats(stats, sourceText) {
 
 /* ------------------------- уникальность ДНК ------------------------- */
 
-async function uniqueDNA() {
+async function uniqueDNA(hint) {
   for (let i = 0; i < 40; i++) {
-    const dna = R.makeDNA();
+    const dna = R.makeDNA(hint);
     const fresh = await L.store.sadd('wd:dna', R.dnaKey(dna));
     if (fresh === 1) return dna;
   }
-  return R.makeDNA();
+  return R.makeDNA(hint);
 }
 
 /* ------------------------------ handler ----------------------------- */
@@ -313,7 +313,8 @@ const handler = async (req, res) => {
   if (!L.clean(content.headline, 90) && !(content.services || []).length)
     return L.fail(res, 400, 'Из этого описания сайт не собрать. Расскажите про своё дело подробнее и конкретнее.');
 
-  const dna = await uniqueDNA();
+  // Описание влияет на палитру: «в розово-красных цветах» будет услышано.
+  const dna = await uniqueDNA(description + ' ' + String(body.style || ''));
 
   const data = {
     name,

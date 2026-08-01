@@ -28,7 +28,30 @@ const PALETTES = [
   { n:'mono-warm',  mode:'light', bg:'#F5F3F0', surf:'#FFFFFF', tx:'#171412', mu:'#6E6660', ac:'#7C3AED', g1:'#7C3AED', g2:'#EC4899' },
   { n:'ice-light',  mode:'light', bg:'#EFF3F6', surf:'#FFFFFF', tx:'#0E1A22', mu:'#5F7482', ac:'#0E7490', g1:'#0E7490', g2:'#34D399' },
   { n:'citrus',     mode:'light', bg:'#FCFBF3', surf:'#FFFFFF', tx:'#1B1D10', mu:'#727761', ac:'#4D7C0F', g1:'#4D7C0F', g2:'#FACC15' },
+
+  // розово-красная группа
+  { n:'rose-warm',  mode:'light', bg:'#FFF5F5', surf:'#FFFFFF', tx:'#2B1216', mu:'#8C6067', ac:'#E11D48', g1:'#E11D48', g2:'#FB7185' },
+  { n:'coral',      mode:'light', bg:'#FFF7F4', surf:'#FFFFFF', tx:'#2A1712', mu:'#8A6A5E', ac:'#F43F5E', g1:'#F43F5E', g2:'#FB923C' },
+  { n:'ruby-dark',  mode:'dark',  bg:'#150609', surf:'#240C13', tx:'#FDEEF1', mu:'#B58A94', ac:'#FF4D6D', g1:'#FF4D6D', g2:'#FF8FA3' },
+  { n:'fuchsia',    mode:'light', bg:'#FDF4FA', surf:'#FFFFFF', tx:'#2A1226', mu:'#8B6480', ac:'#DB2777', g1:'#DB2777', g2:'#F0ABFC' },
+  { n:'crimson',    mode:'dark',  bg:'#120608', surf:'#1F0B10', tx:'#FCEEF0', mu:'#AE8890', ac:'#DC2626', g1:'#DC2626', g2:'#F472B6' },
+  { n:'peach',      mode:'light', bg:'#FFF8F3', surf:'#FFFFFF', tx:'#2B1A12', mu:'#8B7060', ac:'#EA580C', g1:'#EA580C', g2:'#FDA4AF' },
 ];
+
+// Группы палитр по настроению — чтобы учитывать пожелания владельца.
+// Индексы соответствуют порядку в PALETTES выше.
+const MOODS = {
+  pink:   [18, 19, 20, 21, 23],          // rose-warm, coral, ruby-dark, fuchsia, peach
+  red:    [6, 18, 19, 20, 22],           // wine + розово-красные
+  orange: [2, 19, 23],                   // ember, coral, peach
+  blue:   [0, 5, 10, 14, 16],            // obsidian, midnight, sky-soft, sand, ice-light
+  green:  [4, 11, 17],                   // forest-deep, sage, citrus
+  purple: [3, 13, 21],                   // violet-deep, lavender-l, fuchsia
+  yellow: [7, 17],                       // graphite, citrus
+  dark:   [0, 1, 2, 3, 4, 5, 6, 7, 20, 22],
+  light:  [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 23],
+  mono:   [7, 8, 15],
+};
 
 /* ══════════════════════════ шрифты ══════════════════════════ */
 
@@ -55,6 +78,12 @@ const SHAPE   = [0, 4, 12, 20, 28, 999];
 const NAVS    = ['float', 'plain', 'rule'];
 const SECTIONS = ['stats','services','about','process','gallery','reviews','faq'];
 
+// Варианты раскладки внутри блоков — от них зависит, как выглядит сайт,
+// а не только какого он цвета.
+const LAY_SERVICES = ['cards', 'rows', 'numbered', 'price-list'];
+const LAY_ABOUT    = ['split', 'centered', 'quote', 'wide'];
+const LAY_HOURS    = ['table', 'grid', 'compact'];
+
 const DAYS = [
   ['mon','Понедельник'],['tue','Вторник'],['wed','Среда'],['thu','Четверг'],
   ['fri','Пятница'],['sat','Суббота'],['sun','Воскресенье'],
@@ -64,16 +93,79 @@ const DAYS = [
 
 function rnd(max){ return crypto.randomBytes(2).readUInt16BE(0) % max; }
 
-function makeDNA(){
+/* ═══════ пожелания владельца ═══════ */
+// Читаем описание и ищем прямые указания на цвет и настроение.
+// Что нашли — сужает выбор палитры. Что не нашли — остаётся на жребий.
+
+// Только прямые указания на цвет и настроение. Никаких догадок по сфере:
+// «маникюр» не значит «розовый», это решает владелец, а не мы.
+const WORDS = {
+  pink:   ['розов', 'пудров', 'нежн'],
+  red:    ['красн', 'алый', 'алого', 'бордов', 'вишнёв', 'вишнев'],
+  orange: ['оранжев', 'персиков', 'коралл'],
+  blue:   ['син', 'голуб', 'морск', 'лазурн', 'холодн'],
+  green:  ['зелён', 'зелен', 'эко', 'природ', 'мятн', 'травян'],
+  purple: ['фиолет', 'сирен', 'лаванд', 'пурпур'],
+  yellow: ['жёлт', 'желт', 'солнечн', 'золот'],
+  dark:   ['тёмн', 'темн', 'чёрн', 'черн', 'ночн', 'брутальн', 'строг', 'премиум', 'дорог'],
+  light:  ['светл', 'бел', 'воздушн', 'лёгк', 'легк', 'минимал', 'чист'],
+  mono:   ['чёрно-бел', 'черно-бел', 'монохром', 'без цвета', 'сдержанн'],
+};
+
+// «Не хочу розовый» не должно приводить к розовому.
+const NEGATION = /(не|без|кроме)\s+\S{0,12}$/i;
+
+function wishes(text){
+  const low = String(text || '').toLowerCase();
+  const found = [];
+  Object.keys(WORDS).forEach(function(mood){
+    const hit = WORDS[mood].some(function(w){
+      const at = low.indexOf(w);
+      if (at < 0) return false;
+      // смотрим, нет ли отрицания прямо перед словом
+      return !NEGATION.test(low.slice(Math.max(0, at - 16), at));
+    });
+    if (hit) found.push(mood);
+  });
+  return found;
+}
+
+// Из пожеланий собираем список подходящих палитр.
+// Пересечение, если пожеланий несколько: «тёмный розовый» → ruby-dark, crimson.
+function palettesFor(moods){
+  if (!moods.length) return null;
+  let ids = null;
+  moods.forEach(function(m){
+    const set = MOODS[m];
+    if (!set) return;
+    ids = ids === null ? set.slice() : ids.filter(function(i){ return set.indexOf(i) >= 0; });
+  });
+  if (!ids || !ids.length) {
+    // пересечение пустое — берём объединение, чтобы не игнорировать человека совсем
+    ids = [];
+    moods.forEach(function(m){ (MOODS[m] || []).forEach(function(i){ if (ids.indexOf(i) < 0) ids.push(i); }); });
+  }
+  return ids.length ? ids : null;
+}
+
+function makeDNA(hint){
   const order = SECTIONS.slice();
   for (let i = order.length - 1; i > 0; i--){ const j = rnd(i+1); const t = order[i]; order[i] = order[j]; order[j] = t; }
+
+  // Если владелец назвал цвет — выбираем только из подходящих палитр.
+  const wanted = palettesFor(wishes(hint));
+  const pal = wanted ? wanted[rnd(wanted.length)] : rnd(PALETTES.length);
+
   return {
-    p: rnd(PALETTES.length),
+    p: pal,
     f: rnd(FONTS.length),
     h: rnd(HEROES.length),
     m: rnd(MOTION.length),
     r: rnd(SHAPE.length),
     nv: rnd(NAVS.length),
+    ls: rnd(LAY_SERVICES.length),
+    la: rnd(LAY_ABOUT.length),
+    lh: rnd(LAY_HOURS.length),
     grain: rnd(3) > 0,
     mesh: rnd(4) > 0,
     wide: rnd(2) === 1,
@@ -82,7 +174,7 @@ function makeDNA(){
 }
 
 function dnaKey(d){
-  return [d.p,d.f,d.h,d.m,d.r,d.nv,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
+  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
 }
 function dnaCode(d){
   return 'DNA-' + crypto.createHash('sha256').update(dnaKey(d)).digest('hex').slice(0,6).toUpperCase();
@@ -258,6 +350,32 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .wa svg{width:28px;height:28px}
 .bar{position:fixed;top:0;left:0;height:2.5px;background:linear-gradient(90deg,var(--g1),var(--g2));z-index:120;width:0}
 
+.rows{border-top:1px solid var(--hair)}
+.srow{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding:24px 0;border-bottom:1px solid var(--hair)}
+.srow h3{margin-bottom:6px}
+.srow p{color:var(--mu);margin:0;font-size:15.5px;max-width:60ch}
+.srow-price{font-weight:800;font-size:19px;letter-spacing:-.02em;white-space:nowrap;color:var(--ac)}
+.snum{display:grid;grid-template-columns:56px 1fr;gap:18px;align-items:start;padding:20px 0}
+.snum em{font-style:normal;font-family:'${f.d}',serif;font-weight:${f.dw};font-size:34px;letter-spacing:-.05em;color:var(--ac);line-height:1;opacity:.55}
+.snum p{color:var(--mu);margin:5px 0 0;font-size:15.5px}
+.plist2{display:grid;gap:4px}
+.pitem{padding:14px 0;border-bottom:1px solid var(--hair)}
+.pitem-top{display:flex;align-items:baseline;gap:10px}
+.pitem-name{font-weight:700;font-size:18px;white-space:nowrap}
+.pitem-dots{flex:1;border-bottom:2px dotted ${p.mode==='dark'?'#FFFFFF33':'#0000002E'};transform:translateY(-4px)}
+.pitem-price{font-weight:800;font-size:18px;color:var(--ac);white-space:nowrap}
+.pitem-text{color:var(--mu);margin:6px 0 0;font-size:14.5px;max-width:62ch}
+.bigquote{font-family:'${f.d}',serif;font-weight:${f.dw};font-size:clamp(21px,2.8vw,34px);line-height:1.24;letter-spacing:-.025em;margin:0 0 18px}
+.hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;max-width:760px;margin:0 auto}
+.hcell{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:16px 8px;text-align:center}
+.hcell span{display:block;font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.hcell b{font-size:14px;font-variant-numeric:tabular-nums;line-height:1.35}
+.hcell.today{border-color:var(--ac);background:${p.ac}12}
+.hcell.today b{color:var(--ac)}
+.hlines{display:grid}
+.hline{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:15px 0;border-bottom:1px solid var(--hair);font-size:17px}
+.hline b{font-variant-numeric:tabular-nums;color:var(--mu);font-weight:500}
+.hline.today b,.hline.today span{color:var(--ac);font-weight:700}
 .glass{background:${p.mode==='dark'?'#FFFFFF0F':'#FFFFFFB8'};backdrop-filter:blur(22px) saturate(1.3);border:1px solid ${p.mode==='dark'?'#FFFFFF26':'#FFFFFF'};border-radius:calc(var(--r) + 10px);padding:clamp(30px,4.4vw,64px);box-shadow:0 2px 6px #00000012,0 40px 90px ${p.mode==='dark'?'#00000059':'#0000001F'}}
 .sky{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .sky .c{position:absolute;border-radius:50%;background:${p.mode==='dark'?'#FFFFFF14':'#FFFFFF'};filter:blur(42px)}
@@ -276,6 +394,10 @@ ${dna.m==='scale'   ? '.rv{transform:scale(.955)}' : ''}
 ::selection{background:${p.ac}40}
 
 @media(max-width:860px){
+ .hgrid{grid-template-columns:repeat(4,1fr)}
+ .srow{flex-direction:column;gap:10px}
+ .snum{grid-template-columns:44px 1fr;gap:12px}
+ .pitem-name{white-space:normal}
  .links{display:none}
  .burger{display:block}
  .sticky{position:static}
@@ -438,26 +560,80 @@ function statsBlock(d){
   }</div></div></section>`;
 }
 
-function servicesBlock(d){
+function servicesBlock(d, dna){
   if (!d.services || !d.services.length) return '';
-  return `<section class="s tint" id="services"><div class="w">
-    <div class="head"><div class="eyebrow rv">Услуги</div><h2 class="rv" style="--d:60ms">${esc(d.servicesTitle||'Что мы делаем')}</h2></div>
-    <div class="g g3">${d.services.map(function(s,i){
-      return `<div class="card rv" style="--d:${i*80}ms">
-      <span class="idx">${String(i+1).padStart(2,'0')}</span><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p>
-      ${s.price?`<div class="price grad">${esc(s.price)}</div>`:''}</div>`;
-    }).join('')}</div></div></section>`;
+  const head = `<div class="head"><div class="eyebrow rv">Услуги</div><h2 class="rv" style="--d:60ms">${esc(d.servicesTitle||'Что мы делаем')}</h2></div>`;
+  const kind = LAY_SERVICES[dna ? dna.ls : 0];
+
+  // Карточки в сетке
+  if (kind === 'cards')
+    return `<section class="s tint" id="services"><div class="w">${head}
+      <div class="g g3">${d.services.map(function(s,i){
+        return `<div class="card rv" style="--d:${i*80}ms">
+        <span class="idx">${String(i+1).padStart(2,'0')}</span><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p>
+        ${s.price?`<div class="price grad">${esc(s.price)}</div>`:''}</div>`;
+      }).join('')}</div></div></section>`;
+
+  // Широкие строки с разделителями
+  if (kind === 'rows')
+    return `<section class="s tint" id="services"><div class="w">${head}
+      <div class="rows">${d.services.map(function(s,i){
+        return `<div class="srow rv" style="--d:${i*70}ms">
+        <div><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p></div>
+        ${s.price?`<div class="srow-price">${esc(s.price)}</div>`:''}</div>`;
+      }).join('')}</div></div></section>`;
+
+  // Крупная нумерация слева
+  if (kind === 'numbered')
+    return `<section class="s tint" id="services"><div class="w">${head}
+      <div class="g g2">${d.services.map(function(s,i){
+        return `<div class="snum rv" style="--d:${i*70}ms">
+        <em>${String(i+1).padStart(2,'0')}</em>
+        <div><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p>
+        ${s.price?`<div class="price grad" style="font-size:17px">${esc(s.price)}</div>`:''}</div></div>`;
+      }).join('')}</div></div></section>`;
+
+  // Прайс-лист с точками
+  return `<section class="s tint" id="services"><div class="w"><div class="wn">${head}
+    <div class="plist2">${d.services.map(function(s,i){
+      return `<div class="pitem rv" style="--d:${i*60}ms">
+      <div class="pitem-top"><span class="pitem-name">${esc(s.name)}</span><span class="pitem-dots"></span>
+      ${s.price?`<span class="pitem-price">${esc(s.price)}</span>`:''}</div>
+      ${s.text?`<p class="pitem-text">${esc(s.text)}</p>`:''}</div>`;
+    }).join('')}</div></div></div></section>`;
 }
 
-function aboutBlock(d){
+function aboutBlock(d, dna){
   if (!d.about) return '';
   const ph = photos(d);
+  const kind = LAY_ABOUT[dna ? dna.la : 0];
   const side = ph[1]
     ? `<div class="ph rv" style="--d:200ms"><img src="${esc(ph[1])}" alt="" loading="lazy"></div>`
     : '<div class="art v2 rv" style="--d:200ms"></div>';
-  return `<section class="s line" id="about"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:center">
-    <div><div class="eyebrow rv">О нас</div><h2 class="rv" style="--d:60ms">${esc(d.aboutTitle||'Кто мы')}</h2>
-    <p class="lead rv" style="--d:140ms">${esc(d.about)}</p></div>${side}</div></div></section>`;
+
+  if (kind === 'split')
+    return `<section class="s line" id="about"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:center">
+      <div><div class="eyebrow rv">О нас</div><h2 class="rv" style="--d:60ms">${esc(d.aboutTitle||'Кто мы')}</h2>
+      <p class="lead rv" style="--d:140ms">${esc(d.about)}</p></div>${side}</div></div></section>`;
+
+  if (kind === 'centered')
+    return `<section class="s line" id="about"><div class="w" style="text-align:center;max-width:760px">
+      <div class="eyebrow rv">О нас</div><h2 class="rv" style="--d:60ms">${esc(d.aboutTitle||'Кто мы')}</h2>
+      <p class="lead rv" style="--d:140ms;margin:0 auto">${esc(d.about)}</p></div></section>`;
+
+  if (kind === 'quote')
+    return `<section class="s line" id="about"><div class="w" style="max-width:900px">
+      <div class="eyebrow rv">О нас</div>
+      <p class="bigquote rv" style="--d:60ms">${esc(d.about)}</p>
+      <div class="rv" style="--d:160ms;color:var(--mu);font-size:15px">— ${esc(d.name)}${d.city ? ', ' + esc(d.city) : ''}</div></div></section>`;
+
+  return `<section class="s line" id="about">${mesh(true)}<div class="w">
+    <div class="eyebrow rv">О нас</div>
+    <h2 class="rv" style="--d:60ms;max-width:15ch">${esc(d.aboutTitle||'Кто мы')}</h2>
+    <div class="g g2" style="margin-top:26px;align-items:start;gap:clamp(24px,4vw,56px)">
+      <p class="lead rv" style="--d:140ms">${esc(d.about)}</p>
+      ${ph[1] ? `<div class="ph rv" style="--d:200ms"><img src="${esc(ph[1])}" alt="" loading="lazy"></div>` : `<div class="art w v3 rv" style="--d:200ms"></div>`}
+    </div></div></section>`;
 }
 
 function processBlock(d){
@@ -500,16 +676,44 @@ function faqBlock(d){
     }).join('')}</div></div></section>`;
 }
 
-function hoursBlock(h){
-  const rows = DAYS.map(function(pair){
+function hoursBlock(h, dna){
+  const kind = LAY_HOURS[dna ? dna.lh : 0];
+  const pill = '<span class="pill" data-open-badge>Часы работы</span>';
+
+  if (kind === 'table') {
+    const rows = DAYS.map(function(pair){
+      const k = pair[0], label = pair[1];
+      return `<tr data-day="${k}"><td>${label}</td><td>${h[k].closed ? 'Выходной' : esc(h[k].from)+' – '+esc(h[k].to)}</td></tr>`;
+    }).join('');
+    return `<section class="s tint" id="hours"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:start">
+      <div class="sticky"><div class="eyebrow rv">Режим</div><h2 class="rv" style="--d:60ms">Часы работы</h2>
+        <div class="rv" style="--d:140ms;margin-bottom:18px">${pill}</div>
+        <p class="rv" style="--d:180ms;color:var(--mu);font-size:14.5px">Время по Астане, UTC+5. Метка обновляется сама.</p></div>
+      <table class="hrs rv" style="--d:120ms">${rows}</table></div></div></section>`;
+  }
+
+  if (kind === 'grid') {
+    const cells = DAYS.map(function(pair, i){
+      const k = pair[0], label = pair[1];
+      return `<div class="hcell rv" data-day="${k}" style="--d:${i*50}ms">
+        <span>${label.slice(0,2)}</span><b>${h[k].closed ? '—' : esc(h[k].from)+'<br>'+esc(h[k].to)}</b></div>`;
+    }).join('');
+    return `<section class="s tint" id="hours"><div class="w" style="text-align:center">
+      <div class="eyebrow rv">Режим</div><h2 class="rv" style="--d:60ms">Часы работы</h2>
+      <div class="rv" style="--d:120ms;margin-bottom:26px">${pill}</div>
+      <div class="hgrid">${cells}</div>
+      <p class="rv" style="--d:200ms;color:var(--mu);font-size:14px;margin-top:20px">Время по Астане, UTC+5</p></div></section>`;
+  }
+
+  const lines = DAYS.map(function(pair, i){
     const k = pair[0], label = pair[1];
-    return `<tr data-day="${k}"><td>${label}</td><td>${h[k].closed ? 'Выходной' : esc(h[k].from)+' – '+esc(h[k].to)}</td></tr>`;
+    return `<div class="hline rv" data-day="${k}" style="--d:${i*40}ms"><span>${label}</span><b>${
+      h[k].closed ? 'Выходной' : esc(h[k].from)+' – '+esc(h[k].to)}</b></div>`;
   }).join('');
-  return `<section class="s tint" id="hours"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:start">
-    <div class="sticky"><div class="eyebrow rv">Режим</div><h2 class="rv" style="--d:60ms">Часы работы</h2>
-      <div class="rv" style="--d:140ms;margin-bottom:18px"><span class="pill" data-open-badge>Часы работы</span></div>
-      <p class="rv" style="--d:180ms;color:var(--mu);font-size:14.5px">Время по Астане, UTC+5. Метка обновляется сама.</p></div>
-    <table class="hrs rv" style="--d:120ms">${rows}</table></div></div></section>`;
+  return `<section class="s tint" id="hours"><div class="w n">
+    <div class="head"><div class="eyebrow rv">Режим</div><h2 class="rv" style="--d:60ms">Часы работы</h2>
+    <div class="rv" style="--d:120ms">${pill}</div></div>
+    <div class="hlines">${lines}</div></div></section>`;
 }
 
 function contactsBlock(d){
@@ -602,12 +806,12 @@ function render(data, dna, opts){
   });
 
   const blocks = {
-    stats: statsBlock(d), services: servicesBlock(d), about: aboutBlock(d),
+    stats: statsBlock(d), services: servicesBlock(d, dna), about: aboutBlock(d, dna),
     process: processBlock(d), gallery: galleryBlock(d), reviews: reviewsBlock(d), faq: faqBlock(d),
   };
 
   const body = dna.order.map(function(k){ return blocks[k] || ''; }).join('')
-    + hoursBlock(h) + ctaBlock(d) + contactsBlock(d);
+    + hoursBlock(h, dna) + ctaBlock(d) + contactsBlock(d);
 
   const nav = [
     blocks.services && ['#services','Услуги'],
@@ -661,4 +865,4 @@ ${scripts(h)}
 </body></html>`;
 }
 
-module.exports = { render, makeDNA, dnaKey, dnaCode, normalizeHours, DAYS, PALETTES, FONTS, HEROES };
+module.exports = { render, makeDNA, dnaKey, dnaCode, normalizeHours, DAYS, PALETTES, FONTS, HEROES, wishes, MOODS };

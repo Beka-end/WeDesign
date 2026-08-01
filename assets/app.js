@@ -363,6 +363,7 @@
       name: $('fName').value.trim(),
       city: $('fCity').value.trim(),
       category: $('fCategory').value.trim(),
+      style: $('fStyle').value.trim(),
       services: $('fServices').value.trim(),
       description: desc.value.trim(),
       phone: $('fPhone').value.trim(),
