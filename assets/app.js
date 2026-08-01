@@ -285,16 +285,23 @@
   }
 
   var desc = $('fDescription');
-  desc.addEventListener('input', function () {
+  function refreshHint() {
     var n = desc.value.trim().length;
-    $('descCount').textContent = desc.value.length;
+    var hasServices = $('fServices').value.trim().length > 0;
     var hint = $('descHint');
-    if (n === 0) hint.textContent = 'минимум 40 символов';
-    else if (n < 40) hint.textContent = 'ещё ' + (40 - n) + ' символов';
-    else hint.textContent = 'готово, можно собирать';
-    hint.classList.toggle('ready', n >= 40);
-    if (n >= 40) $('heroError').hidden = true;
-  });
+    $('descCount').textContent = desc.value.length;
+
+    if (n >= 40) hint.textContent = 'готово, можно собирать';
+    else if (hasServices) hint.textContent = 'можно не заполнять — услуги указаны';
+    else if (n === 0) hint.textContent = 'опишите дело или укажите услуги ниже';
+    else hint.textContent = 'ещё ' + (40 - n) + ' символов';
+
+    hint.classList.toggle('ready', n >= 40 || hasServices);
+    if (n >= 40 || hasServices) $('heroError').hidden = true;
+  }
+
+  desc.addEventListener('input', refreshHint);
+  $('fServices').addEventListener('input', refreshHint);
 
   /* ═══════════ вызов API ═══════════ */
 
@@ -376,11 +383,11 @@
       elapsed: Date.now() - openedAt
     };
 
-    if (payload.description.length < 40) {
-      var need = 40 - payload.description.length;
+    if (payload.description.length < 40 && !payload.services) {
       return pointAt(desc, err, payload.description.length === 0
-        ? 'Описание пустое. Оно вводится в большое поле наверху страницы — я перенёс вас туда.'
-        : 'Описание короткое: не хватает ' + need + ' символов. Поле наверху страницы, я перенёс вас туда. Напишите 3-4 предложения: что делаете, для кого, чем отличаетесь.');
+        ? 'Заполните что-то одно: опишите дело в поле наверху или перечислите услуги ниже. Одного из двух достаточно.'
+        : 'Описание короткое — не хватает ' + (40 - payload.description.length) +
+          ' символов. Либо допишите, либо перечислите услуги ниже: одного из двух достаточно.');
     }
     if (!payload.name) return pointAt($('fName'), err, 'Не хватает названия — впишите его в поле «Название».');
     if (!payload.city) return pointAt($('fCity'), err, 'Не хватает города — впишите его в поле «Город».');
@@ -420,11 +427,10 @@
   $('btnHero').addEventListener('click', function () {
     if (!requireTerms()) return;
     var len = desc.value.trim().length;
-    if (len < 40) {
-      var need = 40 - len;
+    if (len < 40 && !$('fServices').value.trim()) {
       show($('heroError'), len === 0
-        ? 'Опишите своё дело в этом поле — что делаете, для кого и чем отличаетесь.'
-        : 'Ещё ' + need + ' символов, и собираем. Напишите 3-4 предложения: что делаете, для кого, чем отличаетесь.');
+        ? 'Опишите своё дело в этом поле — или пропустите его и перечислите услуги ниже. Достаточно чего-то одного.'
+        : 'Ещё ' + (40 - len) + ' символов. Либо допишите, либо перечислите услуги ниже — достаточно одного.');
       desc.focus();
       return;
     }

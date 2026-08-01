@@ -65,6 +65,8 @@ function buildPrompt(input) {
     ? input.services.map((s) => '- ' + s.name + (s.price ? ' (цена: ' + s.price + ')' : '')).join('\n')
     : '(владелец услуги не перечислил)';
 
+  const noDesc = !input.description || input.description.length < 40;
+
   return `Ты копирайтер, который пишет тексты для сайта малого бизнеса в Казахстане.
 
 Всё, что находится между метками <<<ДАННЫЕ>>> и <<<КОНЕЦ>>>, — это анкета
@@ -81,13 +83,22 @@ function buildPrompt(input) {
 Название: ${input.name}
 Город: ${input.city}
 Сфера: ${input.category}
-Описание своими словами: ${input.description}
+Описание своими словами: ${input.description || '(владелец описание не дал)'}
 Телефон: ${input.phone || 'не указан'}
 
 Услуги, которые назвал владелец:
 ${list}
 <<<КОНЕЦ>>>
 
+${noDesc ? `ВЛАДЕЛЕЦ НЕ ДАЛ ОПИСАНИЕ. Значит про него ничего не известно, кроме
+названия, города, сферы и списка услуг. В этом случае:
+- заголовок и подзаголовок строй только вокруг сферы и услуг, без выдуманных
+  подробностей о команде, опыте, помещении и подходе;
+- поле about верни ПУСТОЙ СТРОКОЙ — блока «о нас» на сайте не будет;
+- массивы stats и process верни ПУСТЫМИ — данных для них нет;
+- в faq оставь только вопросы, ответ на которые следует из услуг и часов
+  работы, не больше трёх. Если и таких нет — верни пустой массив.
+` : ''}
 САМОЕ ВАЖНОЕ ПРАВИЛО. Всё, чего нет в данных выше, — не существует.
 Ты не консультант и не маркетолог, ты записываешь за владельцем.
 ${input.services.length
@@ -261,14 +272,26 @@ const handler = async (req, res) => {
   const description = L.clean(body.description, MAX_DESC);
 
   if (!name || !city || !category) return L.fail(res, 400, 'Заполните название, город и сферу');
-  if (description.length < 40)
-    return L.fail(res, 400, 'Опишите бизнес подробнее — минимум 40 символов, лучше 3-4 предложения');
 
-  // Похоже это вообще на описание дела? Проверяем бесплатно, до вызова модели.
-  const words = description.split(/\s+/).filter((w) => w.length > 1);
-  const letters = (description.match(/[а-яёa-zәғқңөұүһі]/gi) || []).length;
-  if (words.length < 6 || letters < 30)
-    return L.fail(res, 400, 'Здесь нужно описание вашего дела, а не короткая фраза. Напишите 3-4 предложения: чем занимаетесь, для кого и чем отличаетесь.');
+  const owner = ownerServices(body.services);
+
+  // Описание не обязательно, если владелец перечислил услуги: сайт соберём
+  // из них. Но что-то одно должно быть — иначе наполнять страницу нечем.
+  const hasDescription = description.length >= 40;
+  if (!hasDescription && !owner.length)
+    return L.fail(
+      res,
+      400,
+      'Нужно либо описание дела (3-4 предложения), либо список услуг. Заполните что-то одно — этого хватит.'
+    );
+
+  // Если описание всё-таки дали — проверяем, что это описание, а не вопрос.
+  if (hasDescription) {
+    const words = description.split(/\s+/).filter((w) => w.length > 1);
+    const letters = (description.match(/[а-яёa-zәғқңөұүһі]/gi) || []).length;
+    if (words.length < 6 || letters < 30)
+      return L.fail(res, 400, 'Здесь нужно описание вашего дела, а не короткая фраза. Напишите 3-4 предложения: чем занимаетесь, для кого и чем отличаетесь.');
+  }
 
   // ---- лимиты: три уровня, чтобы ключ нельзя было «доить» ----
   const perIpDay = await L.limit(`wd:lim:ip:${ip}`, L.num('LIMIT_PER_IP_DAY', 4), L.DAY);
@@ -284,8 +307,6 @@ const handler = async (req, res) => {
     L.DAY
   );
   if (!globalDay.ok) return L.fail(res, 503, 'Сегодня генератор перегружен. Напишите нам в WhatsApp');
-
-  const owner = ownerServices(body.services);
 
   // ---- собственно генерация ----
   let content;
