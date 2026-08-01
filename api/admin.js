@@ -46,7 +46,7 @@ const handler = async (req, res) => {
     return L.send(res, 200, {
       ok: true,
       orders,
-      price: L.num('PRICE_KZT', 9990),
+      plans: L.plans(),
       kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
       storage: L.hasKV ? 'redis' : 'память (данные пропадут — подключите Upstash)',
     });
@@ -90,7 +90,21 @@ const handler = async (req, res) => {
     const draft = await L.getJSON(`wd:draft:${order.draftId}`);
     if (!draft) return L.fail(res, 404, 'Черновик устарел, сайт нужно собрать заново');
 
-    // Сайты у себя не размещаем: клиент получает файл и ставит его сам.
+    // Тариф «Готовый сайт» — публикуем у себя. Тариф «Файл» — только скачивание.
+    if (order.plan === 'site' && !order.slug) {
+      let slug = L.slugify(order.business);
+      for (let i = 0; i < 25; i++) {
+        const candidate = i === 0 ? slug : `${slug}-${i + 1}`;
+        const fresh = await L.store.sadd('wd:slugs', candidate);
+        if (fresh === 1) {
+          slug = candidate;
+          break;
+        }
+      }
+      order.slug = slug;
+      await L.setJSON(`wd:site:${slug}`, { code: order.code, draftId: order.draftId }, 400 * L.DAY);
+    }
+
     order.status = 'paid';
     order.paidConfirmedAt = Date.now();
     order.note = '';
@@ -109,11 +123,16 @@ const handler = async (req, res) => {
     return L.send(res, 200, { ok: true, order });
   }
 
-  // Отзыв доступа к файлу: клиент больше не сможет его скачать.
-  // Уже скачанный файл это, разумеется, не отменяет.
+  // Отзыв: сайт снимается с публикации, файл перестаёт скачиваться.
+  // Уже скачанный клиентом файл это, разумеется, не отменяет.
   if (action === 'revoke') {
+    if (order.slug) {
+      await L.store.del(`wd:site:${order.slug}`);
+      await L.store.srem('wd:slugs', order.slug);
+      order.slug = null;
+    }
     order.status = 'rejected';
-    order.note = L.clean(body.note, 200) || 'Доступ к файлу отозван';
+    order.note = L.clean(body.note, 200) || 'Доступ отозван';
     await L.setJSON(`wd:order:${code}`, order, 120 * L.DAY);
     return L.send(res, 200, { ok: true, order });
   }

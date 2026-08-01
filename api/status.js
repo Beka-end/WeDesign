@@ -30,11 +30,15 @@ const handler = async (req, res) => {
     business: order.business,
     fileReady: order.status === 'paid',
     note: order.note || null,
+    plan: order.plan || 'site',
+    planTitle: order.planTitle || '',
+    slug: order.slug || null,
     kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
     support: L.contacts(),
   };
 
-
+  // Для тарифа «Готовый сайт» отдаём адрес опубликованной страницы.
+  if (order.status === 'paid' && order.slug) out.publicUrl = `/s/${order.slug}`;
 
   return L.send(res, 200, out);
 };

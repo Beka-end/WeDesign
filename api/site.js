@@ -16,7 +16,14 @@ const handler = async (req, res) => {
   if (!site || !draft || !order || order.status !== 'paid') {
     res.statusCode = 404;
     return res.end(
-      `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сайт не найден</title></head><body style="font:16px/1.6 system-ui;padding:56px;max-width:520px;margin:0 auto"><h1 style="font-size:26px">Такого сайта здесь нет</h1><p>Возможно, адрес набран с ошибкой или сайт снят с публикации.</p><p><a href="/">На главную WeDesign</a></p></body></html>`
+      `<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Сайт не найден</title></head>
+<body style="font:16px/1.6 system-ui;padding:56px 24px;max-width:520px;margin:0 auto;color:#13161B">
+<h1 style="font-size:26px;letter-spacing:-.03em">Такого сайта здесь нет</h1>
+<p style="color:#6A727E">Возможно, адрес набран с ошибкой или сайт снят с публикации.</p>
+<p><a href="/" style="color:#2563EB;font-weight:700">На главную WeDesign</a></p></body></html>`
     );
   }
 

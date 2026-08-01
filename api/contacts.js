@@ -6,7 +6,7 @@ const L = require('./_lib');
 
 const handler = async (req, res) => {
   res.setHeader('Cache-Control', 'public, max-age=300');
-  return L.send(res, 200, { ok: true, support: L.contacts() });
+  return L.send(res, 200, { ok: true, support: L.contacts(), plans: L.plans() });
 };
 
 module.exports = L.wrap(handler);

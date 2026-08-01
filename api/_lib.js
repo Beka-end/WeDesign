@@ -413,6 +413,38 @@ function wrap(handler) {
 /* Задаются переменными Vercel, чтобы номер лежал в одном месте.        */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Тарифы                                                               */
+/* «file» — клиент размещает сам. «site» — размещаем мы, плюс файл.     */
+/* Диапазоны сумм не пересекаются: 4991–5489 и 9991–10489.              */
+/* ------------------------------------------------------------------ */
+
+const PLANS = {
+  file: {
+    id: 'file',
+    title: 'Файл сайта',
+    envPrice: 'PRICE_FILE',
+    fallback: 4990,
+    short: 'скачиваете и размещаете сами',
+  },
+  site: {
+    id: 'site',
+    title: 'Готовый сайт',
+    envPrice: 'PRICE_SITE',
+    fallback: 9990,
+    short: 'живая ссылка сразу, файл тоже ваш',
+  },
+};
+
+function plan(id) {
+  const p = PLANS[id] || PLANS.site;
+  return { ...p, price: num(p.envPrice, p.fallback) };
+}
+
+function plans() {
+  return [plan('file'), plan('site')];
+}
+
 function contacts() {
   const wa = String(process.env.SUPPORT_WHATSAPP || '').replace(/\D/g, '');
   const phone = String(process.env.SUPPORT_PHONE || process.env.SUPPORT_WHATSAPP || '').trim();
@@ -427,6 +459,8 @@ function contacts() {
 module.exports = {
   store,
   contacts,
+  plan,
+  plans,
   wrap,
   getJSON,
   setJSON,

@@ -23,7 +23,7 @@
     <div class="gate-body" id="gateAsk">
       <span class="k">Прежде чем начать</span>
       <h2 id="gateTitle">Условия работы сервиса</h2>
-      <p>WeDesign собирает сайты для бизнеса и отдаёт готовый файл, который вы размещаете сами. Чтобы пользоваться сервисом, примите два документа:</p>
+      <p>WeDesign собирает сайты для бизнеса. Вы выбираете: получить файл и разместить сайт самостоятельно или получить готовую работающую ссылку. Чтобы пользоваться сервисом, примите два документа:</p>
       <ul class="gate-list">
         <li><a href="/oferta.html" target="_blank" rel="noopener">Публичную оферту</a> — что входит в услугу, сколько стоит, как оплатить и когда возможен возврат</li>
         <li><a href="/politika.html" target="_blank" rel="noopener">Политику обработки персональных данных</a> — какие данные собираются, зачем и как их удалить</li>
@@ -144,7 +144,7 @@
     <li class="rv"><span class="n">1</span><h3>Опишите дело</h3><p>Три-четыре предложения: чем занимаетесь, для кого, чем отличаетесь.</p></li>
     <li class="rv" style="--d:60ms"><span class="n">2</span><h3>Задайте часы</h3><p>По дням недели, с выходными и живой меткой «сейчас открыто».</p></li>
     <li class="rv" style="--d:120ms"><span class="n">3</span><h3>Посмотрите</h3><p>Сайт откроется тут же, с водяным знаком. Не понравился — соберите другой.</p></li>
-    <li class="rv" style="--d:180ms"><span class="n">4</span><h3>Заберите файл</h3><p>После оплаты скачиваете файл сайта и размещаете его сами — бесплатно, за пару минут.</p></li>
+    <li class="rv" style="--d:180ms"><span class="n">4</span><h3>Выберите тариф</h3><p>Разместим сайт за вас или отдадим файл, чтобы вы сделали это сами. Оплата разовая, через Kaspi.</p></li>
   </ol>
 </div></section>
 
@@ -158,32 +158,52 @@
     <div class="card rv" style="--d:120ms"><div class="ico"></div><h3>Услуги и цены</h3><p>Ровно те, что вы перечислили. Лишних услуг и выдуманных цен не появится.</p></div>
     <div class="card rv" style="--d:180ms"><div class="ico"></div><h3>Ваши фотографии</h3><p>Дайте ссылки — поставим в первый экран и галерею.</p></div>
     <div class="card rv" style="--d:240ms"><div class="ico"></div><h3>Живёт на телефоне</h3><p>Восемь из десяти клиентов откроют сайт с телефона. Верстка сделана под это.</p></div>
-    <div class="card rv" style="--d:300ms"><div class="ico"></div><h3>Файл остаётся у вас</h3><p>Скачиваете один файл — это весь сайт. Размещаете где хотите, ни от кого не зависите. <a href="/fayl.html" style="color:var(--ac);font-weight:600">Как это делается</a></p></div>
+    <div class="card rv" style="--d:300ms"><div class="ico"></div><h3>Файл остаётся у вас</h3><p>Один файл — это весь сайт. Отдаём его по любому тарифу, чтобы вы ни от кого не зависели. <a href="/fayl.html" style="color:var(--ac);font-weight:600">Как это делается</a></p></div>
   </div>
-  <p class="micro" style="margin-top:20px">Размещением и доменом занимается сам владелец сайта — это бесплатно и занимает пару минут, <a href="/fayl.html" style="color:var(--ac);font-weight:600">вот инструкция</a>. Так ваш сайт не зависит от нас.</p>
+  <p class="micro" style="margin-top:20px">Своих доменов вида mybiz.kz мы пока не подключаем. Хотите красивый адрес — <a href="#help" style="color:var(--ac);font-weight:600">напишите нам</a>, поможем настроить.</p>
 </div></section>
 
 <!-- ═════ цена ═════ -->
 <section class="s soft line" id="price"><div class="w">
-  <div class="head c rv"><span class="k">Оплата</span><h2>Один платёж, без подписки</h2></div>
-  <div class="two">
-    <div class="pricebox rv">
-      <span class="k">Разовая оплата</span>
-      <div class="price"><span id="priceValue">9 990</span> ₸</div>
-      <p>Через Kaspi. Автосписаний нет, карта нигде не сохраняется.</p>
-      <ul class="plist">
-        <li>Предпросмотр до оплаты</li>
-        <li>Не понравился дизайн — соберите другой</li>
-        <li>Файл сайта остаётся у вас навсегда</li>
+  <div class="head c rv"><span class="k">Цена</span><h2>Два способа получить сайт</h2>
+  <p class="lead">Оба — один платёж без подписки. Разница только в том, кто размещает сайт.</p></div>
+
+  <div class="tariffs">
+    <div class="tariff rv">
+      <span class="t-name">Файл сайта</span>
+      <div class="t-price" data-price="file">4 990 ₸</div>
+      <p class="t-sub">Скачиваете файл и размещаете сами</p>
+      <ul class="t-list">
+        <li>Готовый файл сайта — ваш навсегда</li>
+        <li>Пошаговая инструкция, размещение бесплатное</li>
+        <li>Ни от кого не зависите</li>
+        <li>Занимает пару минут, но делать надо самому</li>
       </ul>
-      <a class="btn" href="#build">Собрать сайт бесплатно</a>
+      <a class="btn o" href="#build">Собрать сайт</a>
     </div>
-    <div class="verify rv" style="--d:60ms">
-      <h3 style="margin-bottom:16px">Как мы понимаем, что заплатили именно вы</h3>
-      <div class="vrow"><span class="n">01</span><div><b>Уникальная сумма</b><p>Не 9 990, а 10 127 ₸. Пока ваша бронь жива, эту сумму не получит никто другой.</p></div></div>
-      <div class="vrow"><span class="n">02</span><div><b>Номер чека</b><p>Один чек засчитывается один раз. Повторный сразу подсвечивается в панели.</p></div></div>
-      <div class="vrow"><span class="n">03</span><div><b>Ручная сверка</b><p>Владелец находит поступление в Kaspi и подтверждает. Автовыдачи нет ни в каком виде.</p></div></div>
+
+    <div class="tariff best rv" style="--d:80ms">
+      <span class="t-badge">Выбирают чаще</span>
+      <span class="t-name">Готовый сайт</span>
+      <div class="t-price" data-price="site">9 990 ₸</div>
+      <p class="t-sub">Даём работающую ссылку — делать ничего не нужно</p>
+      <ul class="t-list">
+        <li>Живая ссылка сразу после оплаты</li>
+        <li>Ставьте её в Instagram, 2ГИС и на визитку</li>
+        <li>Размещением занимаемся мы</li>
+        <li><b>Файл тоже отдаём</b> — на случай, если захотите переехать</li>
+      </ul>
+      <a class="btn" href="#build">Собрать сайт</a>
     </div>
+  </div>
+
+  <p class="micro" style="text-align:center;margin-top:18px">Тариф выбирается после того, как увидите готовый сайт. Предпросмотр бесплатный в обоих случаях.</p>
+
+  <div class="verify rv" style="margin-top:26px">
+    <h3 style="margin-bottom:16px">Как мы понимаем, что заплатили именно вы</h3>
+    <div class="vrow"><span class="n">01</span><div><b>Уникальная сумма</b><p>Не 9 990, а 10 127 ₸. Пока ваша бронь жива, эту сумму не получит никто другой.</p></div></div>
+    <div class="vrow"><span class="n">02</span><div><b>Номер чека</b><p>Один чек засчитывается один раз. Повторный сразу подсвечивается в панели.</p></div></div>
+    <div class="vrow"><span class="n">03</span><div><b>Ручная сверка</b><p>Владелец находит поступление в Kaspi и подтверждает. Автовыдачи нет ни в каком виде.</p></div></div>
   </div>
 </div></section>
 
@@ -261,12 +281,31 @@
       <p class="micro">Код дизайна <span class="mono" id="resultDna">—</span>. Эта комбинация больше не выпадет ни у кого.</p>
     </div>
     <div class="res-act">
-      <label class="field inline"><span>Телефон для связи</span><input id="fContact" maxlength="30" placeholder="+7 707 000 00 00"></label>
       <button class="btn o" id="btnRegen">Другой вариант</button>
       <button class="btn" id="btnTake">Забрать сайт</button>
     </div>
   </div>
-  <p class="micro" style="margin:-6px 0 16px">Телефон нужен, только чтобы связаться по этому заказу: если платёж не сойдётся или понадобятся ваши фотографии. Никаких рассылок.</p>
+  <div class="pick" id="pick">
+    <div class="pick-head"><b>Как хотите получить сайт?</b></div>
+    <div class="pick-row">
+      <label class="pick-opt">
+        <input type="radio" name="plan" value="file">
+        <span class="pick-body">
+          <b>Файл сайта — <span class="pick-price" data-price="file">4 990 ₸</span></b>
+          <small>Скачиваете и размещаете сами. Бесплатно, пара минут по инструкции.</small>
+        </span>
+      </label>
+      <label class="pick-opt on">
+        <input type="radio" name="plan" value="site" checked>
+        <span class="pick-body">
+          <b>Готовый сайт — <span class="pick-price" data-price="site">9 990 ₸</span></b>
+          <small>Даём работающую ссылку сразу. Файл тоже ваш. Делать ничего не нужно.</small>
+        </span>
+      </label>
+    </div>
+    <label class="field" style="margin:14px 0 0;max-width:280px"><span>Телефон для связи</span><input id="fContact" maxlength="30" placeholder="+7 707 000 00 00"></label>
+    <p class="micro" style="margin-top:8px">Нужен, только чтобы связаться по этому заказу. Никаких рассылок.</p>
+  </div>
   <div class="notice" id="takeError" hidden></div>
   <div class="frame"><iframe id="preview" title="Предпросмотр сайта"></iframe></div>
 </div></section>
@@ -276,6 +315,7 @@
   <div class="pay-card">
     <span class="k">Шаг 1 — оплата</span>
     <h2>Переведите ровно эту сумму</h2>
+    <p class="micro" id="payPlan" style="margin-bottom:4px">—</p>
     <div class="amount" id="payAmount">—</div>
     <p class="lead">Хвостик суммы отличает ваш платёж от всех остальных. Округлять нельзя.</p>
     <a class="btn lg" id="kaspiLink" target="_blank" rel="noopener">Перейти в Kaspi</a>
@@ -312,17 +352,29 @@
   </div>
 </div></section>
 
-<!-- ═════ файл готов ═════ -->
+<!-- ═════ готово ═════ -->
 <section class="s soft line" id="done" hidden><div class="w">
   <span class="k">Готово</span>
-  <h2>Ваш сайт готов</h2>
-  <p class="lead">Скачайте файл — это ваш сайт целиком. Разместить его можно бесплатно за пару минут, инструкция ниже. Файл ни от кого не зависит: работает и через год, и без нас.</p>
-  <div class="live">
+  <h2 id="doneTitle">Ваш сайт готов</h2>
+  <p class="lead" id="doneLead">Скачайте файл — это ваш сайт целиком.</p>
+
+  <div class="live" id="liveBox" hidden>
+    <a class="live-url" id="doneUrl" target="_blank" rel="noopener">—</a>
     <div class="live-act">
-      <a class="btn lg" id="btnDownload" download>Скачать файл сайта</a>
-      <a class="btn o lg" href="/fayl.html" target="_blank" rel="noopener">Как разместить →</a>
+      <a class="btn" id="btnOpenSite" target="_blank" rel="noopener">Открыть сайт</a>
+      <button class="btn o" id="btnCopyUrl">Скопировать ссылку</button>
     </div>
-    <p class="micro" style="margin-top:16px">Сохраните файл в надёжном месте. Скачать повторно можно в любой момент по коду заказа в блоке «Мой заказ» ниже.</p>
+  </div>
+
+  <div class="filebox">
+    <div>
+      <b>Файл сайта — ваша копия</b>
+      <p class="micro" style="margin:5px 0 0">Скачайте и сохраните. С ним вы сможете разместить сайт где угодно и не зависите от нас.</p>
+    </div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap">
+      <a class="btn" id="btnDownload" download>Скачать файл</a>
+      <a class="btn o" href="/fayl.html" target="_blank" rel="noopener">Инструкция</a>
+    </div>
   </div>
   <p class="micro" id="doneNote">Нужно поправить текст или добавить фотографии — напишите нам и назовите код заказа.</p>
 </div></section>
@@ -332,7 +384,7 @@
   <div class="rv">
     <span class="k">После оплаты</span>
     <h2>Проверить свой заказ</h2>
-    <p class="lead">Введите код вида WD-XXXX — покажем статус и дадим скачать файл сайта. Если оплата ещё не подтверждена, здесь же откроется форма для чека, с любого устройства.</p>
+    <p class="lead">Введите код вида WD-XXXX — покажем статус, дадим скачать файл и ссылку на сайт, если он у нас размещён. Если оплата ещё не подтверждена, здесь же откроется форма для чека, с любого устройства.</p>
   </div>
   <div class="rv" style="--d:60ms">
     <div class="row">
@@ -367,8 +419,8 @@
     <details><summary>А если я напишу туда вопрос или ерунду?</summary><p>Сайт не соберётся. Здесь собираются страницы для бизнеса, а не отвечают на вопросы: если в поле не описание дела, вы получите просьбу описать своё дело, и попытка не будет потрачена.</p></details>
     <details><summary>Что будет, если я закрою вкладку?</summary><p>Ничего не потеряется. Собранный сайт хранится 30 дней и подтянется сам. С другого устройства — введите код заказа в блоке «Мой заказ».</p></details>
     <details><summary>Кто отвечает за то, что написано на сайте?</summary><p>Вы. Мы размещаем ровно те сведения, которые вы указали: услуги, цены, часы работы. Проверьте их перед оплатой — за достоверность отвечает владелец бизнеса. Если ваша деятельность требует лицензии, указывать её данные на сайте тоже ваша задача.</p></details>
-    <details><summary>А если сервис закроется — что будет с моим сайтом?</summary><p>Ничего. Ваш сайт размещён у вас, не у нас — мы только отдали файл. Он продолжит работать, даже если нас не станет. Именно поэтому мы отдаём файл, а не держим сайты на своей стороне.</p></details>
-    <details><summary>Мне придётся размещать сайт самому?</summary><p>Да, и это проще, чем кажется: перетащить папку в окно браузера на бесплатном сервисе. Пять шагов, пара минут, платить не нужно — <a href="/fayl.html" style="color:var(--ac);font-weight:600">инструкция здесь</a>. Не получается — напишите нам, подскажем.</p></details>
+    <details><summary>Чем тарифы отличаются?</summary><p>По тарифу «Готовый сайт» за 9 990 ₸ мы размещаем сайт сами и даём вам работающую ссылку — делать ничего не нужно. По тарифу «Файл сайта» за 4 990 ₸ вы получаете файл и размещаете его сами: это бесплатно и занимает пару минут по <a href="/fayl.html" style="color:var(--ac);font-weight:600">инструкции</a>. Файл отдаём в обоих случаях.</p></details>
+    <details><summary>А если сервис закроется — что будет с моим сайтом?</summary><p>Файл вашего сайта уже у вас, и он работает независимо от нас. Если ссылка на нашем домене перестанет открываться, вы разместите сайт сами по <a href="/fayl.html" style="color:var(--ac);font-weight:600">инструкции</a> — бесплатно, за пару минут. Именно поэтому мы отдаём файл всем, а не только тем, кто размещает сам.</p></details>
     <details><summary>Как быстро я получу файл после оплаты?</summary><p>Обычно в течение нескольких часов в рабочее время — платёж проверяется вручную. В оферте указан предельный срок 10 рабочих дней: он на случай, если мы окажемся недоступны. Как только платёж подтвердят, кнопка скачивания появится на странице сама.</p></details>
     <details><summary>Что если я оплатил, а файл не пришёл?</summary><p><a href="#help" style="color:var(--ac);font-weight:700">Напишите нам</a> и назовите код заказа и номер чека. Найдём платёж по сумме — она уникальна, спутать её не с чем.</p></details>
   </div>

@@ -15,6 +15,7 @@ const handler = async (req, res) => {
   const draftId = L.clean(body.draftId, 20);
   const contactPhone = L.clean(body.contactPhone, 30);
   const accId = L.clean(body.termsId, 20);
+  const chosen = L.plan(L.clean(body.plan, 10));
 
   // Имя при заказе не спрашиваем: платёж опознаётся по уникальной сумме,
   // а имя плательщика придёт вместе с чеком. Телефон — только для связи.
@@ -42,7 +43,7 @@ const handler = async (req, res) => {
   const device = L.fingerprint(req);
   const sameDevice = termsOk ? receipt.device === device : null;
 
-  const base = L.num('PRICE_KZT', 9990);
+  const base = chosen.price;
   const windowMin = L.num('PAY_WINDOW_MIN', 90);
 
   // Подбираем свободную «хвостовую» добавку: 9990 + 137 = 10 127 ₸.
@@ -60,6 +61,8 @@ const handler = async (req, res) => {
 
   const order = {
     code: 'WD-' + L.code(4),
+    plan: chosen.id,
+    planTitle: chosen.title,
     // След согласия: версия документов, время принятия у клиента и время у нас.
     // Это доказательство на нашей стороне, а не только в браузере клиента.
     terms: termsOk
@@ -100,6 +103,8 @@ function publicOrder(o) {
   return {
     code: o.code,
     amount: o.amount,
+    plan: o.plan,
+    planTitle: o.planTitle,
     status: o.status,
     expiresAt: o.expiresAt,
     kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',

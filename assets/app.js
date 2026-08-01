@@ -42,8 +42,19 @@
       var r = await fetch('/api/contacts');
       var d = await r.json();
       support = d.ok ? d.support : null;
+      if (d.ok && d.plans) paintPlans(d.plans);
     } catch (e) { support = null; }
     paintSupport();
+  }
+
+  // Цены задаются переменными на сервере — подставляем их в разметку.
+  function paintPlans(list) {
+    list.forEach(function (p) {
+      var money = String(p.price).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₸';
+      document.querySelectorAll('[data-price="' + p.id + '"]').forEach(function (el) {
+        el.textContent = money;
+      });
+    });
   }
 
   function paintSupport() {
@@ -432,6 +443,21 @@
   });
   $('btnRegen').addEventListener('click', generate);
 
+  /* ═══════════ выбор тарифа ═══════════ */
+
+  function chosenPlan() {
+    var el = document.querySelector('input[name="plan"]:checked');
+    return el ? el.value : 'site';
+  }
+
+  document.querySelectorAll('input[name="plan"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      document.querySelectorAll('.pick-opt').forEach(function (o) {
+        o.classList.toggle('on', o.contains(r) && r.checked ? true : o.querySelector('input').checked);
+      });
+    });
+  });
+
   /* ═══════════ заказ и оплата ═══════════ */
 
   function tenge(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
@@ -500,6 +526,7 @@
   function openPay(o) {
     order = o;
     $('payAmount').textContent = tenge(o.amount) + ' ₸';
+    if (o.planTitle) $('payPlan').textContent = 'Тариф «' + o.planTitle + '»';
     $('payCode').textContent = o.code;
     $('cAmount').value = o.amount;
     $('kaspiLink').href = o.kaspiUrl || 'https://pay.kaspi.kz/pay/cwevqlzj';
@@ -534,6 +561,7 @@
       var made = await api('/api/order', {
         draftId: draftId,
         contactPhone: phone,
+        plan: chosenPlan(),
         termsId: accepted ? accepted.id : ''
       });
       STORE.set('order', made.code);
@@ -584,6 +612,20 @@
 
   function showDone(data) {
     $('btnDownload').href = '/api/download?code=' + encodeURIComponent(data.code);
+
+    if (data.publicUrl) {
+      var url = location.origin + data.publicUrl;
+      $('doneUrl').textContent = url;
+      $('doneUrl').href = url;
+      $('btnOpenSite').href = url;
+      $('liveBox').hidden = false;
+      $('doneTitle').textContent = 'Ваш сайт работает';
+      $('doneLead').textContent = 'Ставьте эту ссылку в шапку Instagram, в карточку 2ГИС и на визитку. Сайт открывается сразу, ничего устанавливать не нужно.';
+    } else {
+      $('liveBox').hidden = true;
+      $('doneTitle').textContent = 'Ваш сайт готов';
+      $('doneLead').textContent = 'Скачайте файл — это ваш сайт целиком. Разместить его можно бесплатно за пару минут, инструкция рядом с кнопкой.';
+    }
     $('doneNote').innerHTML =
       'Нужно поправить текст или добавить фотографии — ' +
       (support && support.whatsapp

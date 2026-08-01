@@ -105,8 +105,8 @@
       kaspiUrl = data.kaspiUrl;
       $('kaspiOpen').href = kaspiUrl;
       var waiting = orders.filter(function (o) { return o.status === 'claimed'; }).length;
-      $('meta').textContent =
-        'Цена ' + tenge(data.price) + ' ₸ · хранилище: ' + data.storage + ' · ждут проверки: ' + waiting;
+      var pr = (data.plans || []).map(function (p) { return p.title + ' ' + tenge(p.price) + ' ₸'; }).join(' · ');
+      $('meta').textContent = pr + ' · хранилище: ' + data.storage + ' · ждут проверки: ' + waiting;
       render();
     } catch (e) {
       alert(e.message);
@@ -149,8 +149,11 @@
         '</div>' +
         '<div class="kv">' +
           '<div><span>Сумма к оплате</span><b class="mono">' + tenge(o.amount) + ' ₸</b></div>' +
+          '<div><span>Тариф</span><b>' + esc(o.planTitle || 'Готовый сайт') +
+            (o.plan === 'site' ? ' <span style="color:var(--ac);font-size:12px">— публикуем</span>' : ' <span style="color:var(--mu);font-size:12px">— только файл</span>') + '</b></div>' +
           '<div><span>Телефон для связи</span><b>' + esc(o.contactPhone) + '</b></div>' +
           '<div><span>Заказ создан</span><b style="font-size:14px">' + when(o.createdAt) + '</b></div>' +
+          (o.slug ? '<div><span>Адрес сайта</span><b style="font-size:14px">/s/' + esc(o.slug) + '</b></div>' : '') +
           (c.payerName ? '<div><span>Плательщик по чеку</span><b>' + esc(c.payerName) + '</b></div>' : '') +
           (c.receiptNo ? '<div><span>Номер чека</span><b class="mono">' + esc(c.receiptNo) + '</b></div>' : '') +
           (c.amountPaid ? '<div><span>Заявленная сумма</span><b class="mono">' + tenge(c.amountPaid) + ' ₸</b></div>' : '') +
@@ -179,8 +182,8 @@
                 '\nЭту ссылку можно ставить в Instagram, 2ГИС и на визитку. Заказ ' + o.code + '.'
               ) + '">Отправить ссылку в WhatsApp</a>'
             : '') +
-          (o.status !== 'paid' ? '<button class="btn btn-sm" data-act="confirm" data-code="' + o.code + '">Платёж получен, выдать файл</button>' : '') +
-          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="revoke" data-code="' + o.code + '">Отозвать файл</button>' : '') +
+          (o.status !== 'paid' ? '<button class="btn btn-sm" data-act="confirm" data-code="' + o.code + '">Платёж получен' + (o.plan === 'site' ? ', опубликовать' : ', выдать файл') + '</button>' : '') +
+          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="revoke" data-code="' + o.code + '">Отозвать</button>' : '') +
           (o.status !== 'paid' && o.status !== 'rejected' ? '<button class="btn btn-ghost btn-sm" data-act="reject" data-code="' + o.code + '">Платежа нет</button>' : '') +
         '</div>' +
       '</div>';
@@ -230,7 +233,7 @@
         return;
       }
       if (action === 'confirm') {
-        if (!confirm('Вы своими глазами увидели этот платёж в Kaspi? Клиент получит файл своего сайта.')) return;
+        if (!confirm('Вы своими глазами увидели этот платёж в Kaspi?')) return;
       }
       var note = '';
       if (action === 'reject' || action === 'revoke') {
