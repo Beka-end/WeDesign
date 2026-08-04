@@ -151,7 +151,8 @@
           '<div><span>Сумма к оплате</span><b class="mono">' + tenge(o.amount) + ' ₸</b></div>' +
           '<div><span>Тариф</span><b>' + esc(o.planTitle || 'Готовый сайт') +
             (o.plan === 'site' ? ' <span style="color:var(--ac);font-size:12px">— публикуем</span>' : ' <span style="color:var(--mu);font-size:12px">— только файл</span>') + '</b></div>' +
-          '<div><span>Телефон для связи</span><b>' + esc(o.contactPhone) + '</b></div>' +
+          '<div><span>Телефон для связи</span><b><a href="tel:' + esc(String(o.contactPhone).replace(/[^0-9+]/g, '')) +
+            '" style="color:var(--ac)">' + esc(o.contactPhone) + '</a></b></div>' +
           '<div><span>Заказ создан</span><b style="font-size:14px">' + when(o.createdAt) + '</b></div>' +
           (o.slug ? '<div><span>Адрес сайта</span><b style="font-size:14px">/s/' + esc(o.slug) + '</b></div>' : '') +
           (c.payerName ? '<div><span>Плательщик по чеку</span><b>' + esc(c.payerName) + '</b></div>' : '') +
@@ -169,11 +170,11 @@
         chain(o) +
         checklist +
         '<div class="row-actions">' +
-          '<button class="btn btn-ghost btn-sm" data-act="preview" data-code="' + o.code + '">Открыть сайт</button>' +
+          '<button class="btn btn-ghost btn-sm" data-act="preview" data-code="' + o.code + '">Посмотреть</button>' +
           (o.terms && o.terms.verified
-            ? '<button class="btn btn-ghost btn-sm" data-acc="' + esc(o.terms.id) + '">Расписка о согласии</button>'
+            ? '<button class="btn btn-ghost btn-sm" data-acc="' + esc(o.terms.id) + '">Расписка</button>'
             : '') +
-          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="export" data-code="' + o.code + '">Скачать файл сайта</button>' : '') +
+          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="export" data-code="' + o.code + '">Скачать файл</button>' : '') +
           (o.status === 'paid' && o.slug && o.contactPhone
             ? '<a class="btn btn-sm" target="_blank" rel="noopener" href="https://wa.me/' +
               encodeURIComponent(String(o.contactPhone).replace(/\D/g, '')) +
@@ -271,7 +272,7 @@
           '<tr><td>Отпечаток устройства</td><td class="mono">' + esc(r.device) + '</td></tr>' +
           '<tr><td>Браузер</td><td style="font-size:13px">' + esc(r.ua || '—') + '</td></tr>' +
           '<tr><td>Язык</td><td>' + esc(r.lang || '—') + '</td></tr>' +
-          '<tr><td>Подпись</td><td class="mono" style="font-size:11.5px;word-break:break-all">' + esc(r.sig) + '</td></tr>' +
+          '<tr><td>Подпись</td><td class="mono" style="font-size:11px;word-break:break-all;line-height:1.5">' + esc(r.sig) + '</td></tr>' +
         '</table>' +
         '<p class="micro" style="margin-top:14px">Эту таблицу можно распечатать или сохранить как PDF через печать страницы.</p>';
       out.classList.add(d.valid ? 'ok' : 'bad');

@@ -106,6 +106,18 @@ p{margin:0 0 1em}
 .sub{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:13px;color:var(--mu)}
 .sub .dna{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--amber);font-variant-numeric:tabular-nums}
 
+/* ——— сравнение ——— */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:880px;margin:0 auto}
+.vs-col{background:var(--card);border-radius:20px;padding:26px;box-shadow:var(--sh-1)}
+.vs-col.best{box-shadow:var(--sh-2),inset 0 0 0 2px var(--ac)}
+.vs-tag{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:16px}
+.vs-col.best .vs-tag{color:var(--ac)}
+.vs-list{list-style:none;padding:0;margin:0;font-size:15px}
+.vs-list li{padding:9px 0 9px 27px;position:relative;color:var(--mu);line-height:1.45}
+.vs-list.bad li:before{content:'—';position:absolute;left:2px;color:#9AA3B0;font-weight:700}
+.vs-list.good li:before{content:'✓';position:absolute;left:0;color:var(--ac);font-weight:800}
+.vs-list.good li{color:var(--ink)}
+
 /* ——— два пути ——— */
 .ways{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;max-width:840px;margin:20px auto 0;text-align:left}
 .way{background:var(--card);border-radius:18px;padding:22px;box-shadow:var(--sh-1);display:flex;flex-direction:column}
@@ -202,7 +214,7 @@ p{margin:0 0 1em}
 .field{display:block;margin-bottom:14px}
 .field>span{display:block;font-size:13px;color:var(--mu);margin-bottom:7px}
 .field>span i{font-style:normal;opacity:.6}
-.field input,.field textarea{width:100%;background:var(--soft);border:1.5px solid transparent;color:var(--ink);border-radius:12px;padding:12px 15px;transition:border-color .16s,background .16s}
+.field input,.field textarea{width:100%;background:var(--soft);border:1.5px solid transparent;color:var(--ink);border-radius:12px;padding:12px 15px;font-size:16px;transition:border-color .16s,background .16s}
 .field input:focus,.field textarea:focus{border-color:var(--ac);background:var(--card);outline:none}
 .field input::placeholder,.field textarea::placeholder{color:#9AA3B0}
 .field textarea{resize:vertical;line-height:1.5}
