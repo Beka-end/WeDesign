@@ -61,13 +61,21 @@
 
 <!-- ═════ первый экран ═════ -->
 <header class="hero">
+  <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <svg class="hills" viewBox="0 0 1440 240" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 150c214-62 396 26 646 8s436-88 794-32v114H0z" fill="#A9CE8E" opacity=".5"/>
+    <path d="M0 186c256-46 434 16 712 4s474-62 728-18v68H0z" fill="#8CBB72" opacity=".72"/>
+  </svg>
 
   <nav class="nav"><div class="in">
     <a class="brand" href="/">WeDesign</a>
     <div class="links">
       <a href="#examples">Примеры</a><a href="#why">Почему мы</a><a href="#how">Как это работает</a><a href="#price">Цена</a>
     </div>
-    <a class="btn sm" href="#build">Собрать сайт</a>
+    <div class="nav-right">
+      <a class="txt" href="#check">Мой заказ</a>
+      <a class="btn sm" href="#build">Собрать сайт</a>
+    </div>
     <button class="burger" aria-label="Меню"><i></i><i></i></button>
   </div></nav>
   <div class="menu">
@@ -77,8 +85,8 @@
 
   <div class="w hero-in">
     <span class="pill"><i></i>Оплата <b>через Kaspi</b> · один раз, без подписки</span>
-    <h1 style="margin:22px auto 18px;max-width:15ch">Сайт без единого технического действия</h1>
-    <p class="lead" style="margin:0 auto">Не нужно ничего уметь: ни настраивать хостинг, ни разбираться в английском, ни заводить карту для подписок. Расскажите про своё дело обычными словами — остальное сделаем мы.</p>
+    <h1>Сайт без единого технического действия</h1>
+    <p class="lead">Расскажите про своё дело обычными словами — остальное сделаем мы.</p>
 
     <div class="prompt">
       <textarea id="fDescription" maxlength="900" placeholder="Сделайте профессиональный сайт для моего барбершопа на три кресла в Алмалинском районе. Стрижки, бороды, детские. Работаем по записи, мастера с опытом от пяти лет."></textarea>
@@ -89,27 +97,18 @@
         </div>
         <button class="send" id="btnHero" aria-label="Собрать сайт">→</button>
       </div>
-      <div class="prompt-foot"><span id="descCount">0</span> / 900 · <span id="descHint">опишите дело или укажите услуги ниже</span></div>
+      <div class="prompt-foot"><span id="descCount">0</span> / 900 · <span id="descHint">опишите дело или укажите услуги ниже</span> · <span class="dna" id="dnaTicker">DNA-7F3A2C</span></div>
     </div>
 
     <div class="notice" id="heroError" hidden></div>
 
-    <div class="ways">
-      <div class="way">
-        <span class="way-tag">Путь первый</span>
-        <b>Описать словами</b>
-        <p>Напишите в поле выше 3–4 предложения. Получите полный сайт: первый экран, услуги, блок «о нас», ваши цифры, порядок работы и вопросы-ответы.</p>
-      </div>
-      <div class="way-or">или</div>
-      <div class="way">
-        <span class="way-tag">Путь второй</span>
-        <b>Просто перечислить услуги</b>
-        <p>Не хотите писать — пропустите поле и заполните услуги в форме ниже. Получите короткий сайт: первый экран, услуги с ценами, часы работы и контакты.</p>
-        <a class="way-link" href="#build">Перейти к форме →</a>
-      </div>
+    <div class="chips">
+      <span class="chip" data-cat="барбершоп">Барбершоп</span>
+      <span class="chip" data-cat="кофейня">Кофейня</span>
+      <span class="chip" data-cat="автосервис">Автосервис</span>
+      <span class="chip" data-cat="стоматология">Стоматология</span>
+      <span class="chip" data-cat="пекарня">Пекарня</span>
     </div>
-    <div class="sub">Каждый сайт неповторим <span class="dna" id="dnaTicker">DNA-7F3A2C</span></div>
-    <p class="micro" style="margin-top:10px">Продолжая, вы принимаете <a href="/oferta.html" style="color:var(--ac)">оферту</a> и <a href="/politika.html" style="color:var(--ac)">политику данных</a></p>
 
     <div class="tiles">
       <a class="tile" href="/primery/primer-1-barbershop.html" target="_blank" rel="noopener">
@@ -130,6 +129,21 @@
       </a>
     </div>
     <div class="tiles-more"><a class="btn o" href="#examples">Смотреть все примеры</a></div>
+
+    <div class="ways">
+      <div class="way">
+        <span class="way-tag">Путь первый</span>
+        <b>Описать словами</b>
+        <p>Напишите в поле выше 3–4 предложения. Получите полный сайт: первый экран, услуги, блок «о нас», ваши цифры, порядок работы и вопросы-ответы.</p>
+      </div>
+      <div class="way-or">или</div>
+      <div class="way">
+        <span class="way-tag">Путь второй</span>
+        <b>Просто перечислить услуги</b>
+        <p>Не хотите писать — пропустите поле и заполните услуги в форме ниже. Получите короткий сайт: первый экран, услуги с ценами, часы работы и контакты.</p>
+        <a class="way-link" href="#build">Перейти к форме →</a>
+      </div>
+    </div>
   </div>
 </header>
 
