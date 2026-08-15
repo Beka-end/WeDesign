@@ -4,29 +4,29 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Мама Кофе — кофейня в Астане</title>
 <meta name="description" content="Своя обжарка, завтраки до полудня, открываемся в семь утра.">
-<meta name="theme-color" content="#FBF8F1">
+<meta name="theme-color" content="#FDF5F6">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Мама Кофе — кофейня в Астане">
 <meta property="og:description" content="Своя обжарка, завтраки до полудня, открываемся в семь утра.">
 <meta name="robots" content="index,follow">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;700;800&family=Onest:wght@400;600;700;800&display=swap&subset=cyrillic,latin">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap&subset=cyrillic,latin">
 <style>
 :root{
- --bg:#FBF8F1;--surf:#FFFFFF;--tx:#1F2933;--mu:#6F7C89;--ac:#1D4ED8;
- --g1:#1D4ED8;--g2:#F59E0B;--on:#FFFFFF;--glass:#0000000A;--hair:#00000014;
- --r:20px;--maxw:1280px;
+ --bg:#FDF5F6;--surf:#FFFFFF;--tx:#26131A;--mu:#8A6874;--ac:#BE185D;
+ --g1:#BE185D;--g2:#F97316;--on:#FFFFFF;--glass:#0000000A;--hair:#00000014;
+ --r:0px;--maxw:1080px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:'Onest',system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Manrope',system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 button{font:inherit}
 .w{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2}
 .w.n{max-width:820px}
 
-h1,h2,h3{font-family:'Bitter',Georgia,serif;font-weight:700;letter-spacing:-.03em;line-height:.98;margin:0 0 .42em;text-transform:none}
+h1,h2,h3{font-family:'Manrope',Georgia,serif;font-weight:800;letter-spacing:-.045em;line-height:.98;margin:0 0 .42em;text-transform:none}
 h1{font-size:clamp(40px,7.4vw,92px)}
 h2{font-size:clamp(30px,4.6vw,58px);line-height:1.02}
 h3{font-size:clamp(19px,1.7vw,23px);line-height:1.2;letter-spacing:-.02em}
@@ -44,7 +44,7 @@ body:before{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .mesh i:nth-child(3){width:34vw;height:34vw;background:var(--ac);bottom:-16vw;left:36vw;opacity:.2}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--ac);color:var(--on);border:0;border-radius:var(--r);padding:16px 30px;font-weight:700;font-size:16px;letter-spacing:-.01em;cursor:pointer;position:relative;overflow:hidden;transition:transform .22s cubic-bezier(.2,.7,.3,1),box-shadow .22s ease}
-.btn:hover{transform:translateY(-3px);box-shadow:0 16px 40px #1D4ED844}
+.btn:hover{transform:translateY(-3px);box-shadow:0 16px 40px #BE185D44}
 .btn:after{content:'';position:absolute;inset:0;background:linear-gradient(102deg,var(--g1),var(--g2));opacity:0;transition:opacity .25s ease}
 .btn:hover:after{opacity:1}
 .btn span{position:relative;z-index:1}
@@ -53,19 +53,19 @@ body:before{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .btn.o:after{display:none}
 
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .3s ease,box-shadow .3s ease,padding .3s ease;padding:14px 0}
-.nav.stuck{background:#FBF8F1D9;backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 1px 0 var(--hair)}
+.nav.stuck{background:#FDF5F6D9;backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 1px 0 var(--hair)}
 
 .nav .in{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand{font-family:'Bitter',serif;font-weight:700;font-size:20px;letter-spacing:-.03em;text-transform:none}
+.brand{font-family:'Manrope',serif;font-weight:800;font-size:20px;letter-spacing:-.045em;text-transform:none}
 .links{display:flex;gap:2px;align-items:center}
 .links a{font-size:15px;color:var(--mu);padding:9px 15px;border-radius:999px;transition:color .2s,background .2s}
 .links a:hover{color:var(--tx);background:var(--glass)}
 
 .burger{display:none;background:none;border:0;color:inherit;width:44px;height:44px;cursor:pointer}
 .burger i{display:block;width:22px;height:1.8px;background:currentColor;margin:5px auto}
-.menu{position:fixed;inset:0;z-index:99;background:#FBF8F1F7;backdrop-filter:blur(20px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.menu{position:fixed;inset:0;z-index:99;background:#FDF5F6F7;backdrop-filter:blur(20px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px}
 .menu.on{display:flex}
-.menu a{font-family:'Bitter',serif;font-size:clamp(28px,7vw,44px);font-weight:700;letter-spacing:-.03em;padding:10px 0}
+.menu a{font-family:'Manrope',serif;font-size:clamp(28px,7vw,44px);font-weight:800;letter-spacing:-.045em;padding:10px 0}
 
 .s{padding:clamp(74px,10vw,150px) 0;position:relative}
 .s.tint{background:var(--surf)}
@@ -77,27 +77,27 @@ body:before{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
 .card{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:clamp(24px,2.6vw,34px);position:relative;overflow:hidden;box-shadow:0 1px 2px #0000000A,0 12px 30px #0000000D;transition:transform .3s cubic-bezier(.2,.7,.3,1),border-color .3s,box-shadow .3s}
 .s.tint .card{background:var(--bg)}
-.card:hover{transform:translateY(-5px);border-color:#1D4ED866;box-shadow:0 2px 4px #0000000F,0 26px 60px #00000017}
-.card:before{content:'';position:absolute;inset:0;background:linear-gradient(140deg,#1D4ED812,transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
+.card:hover{transform:translateY(-5px);border-color:#BE185D66;box-shadow:0 2px 4px #0000000F,0 26px 60px #00000017}
+.card:before{content:'';position:absolute;inset:0;background:linear-gradient(140deg,#BE185D12,transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
 .card:hover:before{opacity:1}
 .card p{color:var(--mu);margin:0;font-size:15.5px}
 .card .price{margin-top:16px;font-weight:800;font-size:19px;letter-spacing:-.02em}
 .idx{font-size:12px;font-weight:700;color:var(--ac);letter-spacing:.14em;margin-bottom:14px;display:block}
 
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:clamp(20px,3vw,44px)}
-.stat b{display:block;font-family:'Bitter',serif;font-weight:700;font-size:clamp(38px,5.4vw,70px);letter-spacing:-.05em;line-height:1;background:linear-gradient(102deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat b{display:block;font-family:'Manrope',serif;font-weight:800;font-size:clamp(38px,5.4vw,70px);letter-spacing:-.05em;line-height:1;background:linear-gradient(102deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .stat span{display:block;color:var(--mu);font-size:14.5px;margin-top:10px}
 
 .marq{overflow:hidden;padding:18px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);white-space:nowrap;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
 .marq .t{display:inline-block;animation:mv 34s linear infinite}
-.marq b{font-family:'Bitter',serif;font-weight:700;font-size:clamp(22px,3vw,40px);letter-spacing:-.03em;text-transform:none;padding:0 26px;opacity:.85}
+.marq b{font-family:'Manrope',serif;font-weight:800;font-size:clamp(22px,3vw,40px);letter-spacing:-.045em;text-transform:none;padding:0 26px;opacity:.85}
 .marq i{color:var(--ac);font-style:normal}
 @keyframes mv{to{transform:translateX(-50%)}}
 
 .sticky{position:sticky;top:110px}
 .proc{border-top:1px solid var(--hair);padding:26px 0;display:grid;grid-template-columns:64px 1fr;gap:22px;align-items:start}
 .proc:last-child{border-bottom:1px solid var(--hair)}
-.proc em{font-style:normal;font-family:'Bitter',serif;font-size:15px;font-weight:700;color:var(--ac)}
+.proc em{font-style:normal;font-family:'Manrope',serif;font-size:15px;font-weight:800;color:var(--ac)}
 .proc p{color:var(--mu);margin:6px 0 0;font-size:15.5px}
 
 .art{aspect-ratio:4/5;border-radius:var(--r);position:relative;overflow:hidden;background:linear-gradient(150deg,var(--g1),var(--g2))}
@@ -114,13 +114,13 @@ body:before{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;ba
 .hrs td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--mu)}
 .hrs tr:last-child td{border-bottom:0}
 .hrs tr.today td{color:var(--ac);font-weight:700}
-.pill{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;padding:9px 17px;border-radius:999px;background:#1D4ED81F;color:var(--ac)}
+.pill{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;padding:9px 17px;border-radius:999px;background:#BE185D1F;color:var(--ac)}
 .pill:before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pulse 2.4s infinite}
 .pill[data-open="0"]{background:var(--glass);color:var(--mu)}
 .pill[data-open="0"]:before{animation:none}
 @keyframes pulse{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
 
-.big-link{display:block;font-family:'Bitter',serif;font-weight:700;font-size:clamp(22px,3.2vw,38px);letter-spacing:-.03em;padding:20px 0;border-bottom:1px solid var(--hair);transition:padding-left .3s,color .3s}
+.big-link{display:block;font-family:'Manrope',serif;font-weight:800;font-size:clamp(22px,3.2vw,38px);letter-spacing:-.045em;padding:20px 0;border-bottom:1px solid var(--hair);transition:padding-left .3s,color .3s}
 .big-link:hover{padding-left:16px;color:var(--ac)}
 
 .cta{border-radius:var(--r);padding:clamp(40px,6vw,86px);position:relative;overflow:hidden;background:linear-gradient(120deg,var(--g1),var(--g2));color:#fff;text-align:center}
@@ -150,7 +150,7 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .srow p{color:var(--mu);margin:0;font-size:15.5px;max-width:60ch}
 .srow-price{font-weight:800;font-size:19px;letter-spacing:-.02em;white-space:nowrap;color:var(--ac)}
 .snum{display:grid;grid-template-columns:56px 1fr;gap:18px;align-items:start;padding:20px 0}
-.snum em{font-style:normal;font-family:'Bitter',serif;font-weight:700;font-size:34px;letter-spacing:-.05em;color:var(--ac);line-height:1;opacity:.55}
+.snum em{font-style:normal;font-family:'Manrope',serif;font-weight:800;font-size:34px;letter-spacing:-.05em;color:var(--ac);line-height:1;opacity:.55}
 .snum p{color:var(--mu);margin:5px 0 0;font-size:15.5px}
 .plist2{display:grid;gap:4px}
 .pitem{padding:14px 0;border-bottom:1px solid var(--hair)}
@@ -159,17 +159,42 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .pitem-dots{flex:1;border-bottom:2px dotted #0000002E;transform:translateY(-4px)}
 .pitem-price{font-weight:800;font-size:18px;color:var(--ac);white-space:nowrap}
 .pitem-text{color:var(--mu);margin:6px 0 0;font-size:14.5px;max-width:62ch}
-.bigquote{font-family:'Bitter',serif;font-weight:700;font-size:clamp(21px,2.8vw,34px);line-height:1.24;letter-spacing:-.025em;margin:0 0 18px}
+.bigquote{font-family:'Manrope',serif;font-weight:800;font-size:clamp(21px,2.8vw,34px);line-height:1.24;letter-spacing:-.025em;margin:0 0 18px}
 .hgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;max-width:760px;margin:0 auto}
 .hcell{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:16px 8px;text-align:center}
 .hcell span{display:block;font-size:12px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 .hcell b{font-size:14px;font-variant-numeric:tabular-nums;line-height:1.35}
-.hcell.today{border-color:var(--ac);background:#1D4ED812}
+.hcell.today{border-color:var(--ac);background:#BE185D12}
 .hcell.today b{color:var(--ac)}
 .hlines{display:grid}
 .hline{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:15px 0;border-bottom:1px solid var(--hair);font-size:17px}
 .hline b{font-variant-numeric:tabular-nums;color:var(--mu);font-weight:500}
 .hline.today b,.hline.today span{color:var(--ac);font-weight:700}
+/* ——— объём ——— */
+.depth{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;perspective:900px}
+.orb{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 30% 26%, #FFFFFF55, #BE185D 42%, #F97316 78%, #00000022 100%);
+  box-shadow:inset -18px -22px 60px #00000038, 0 40px 90px #BE185D2E;
+  animation:float 14s ease-in-out infinite}
+.orb.a{width:min(30vw,340px);height:min(30vw,340px);top:8%;right:-6%}
+.orb.b{width:min(14vw,150px);height:min(14vw,150px);bottom:12%;left:6%;animation-delay:-5s;opacity:.75}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-26px) rotate(6deg)}}
+.ribbon{position:absolute;width:150%;height:230px;left:-25%;top:18%;
+  background:linear-gradient(100deg,transparent,#BE185D2E 22%,#F9731638 52%,transparent 88%);
+  filter:blur(2px);transform:rotate(-11deg) skewY(-4deg);animation:sway 18s ease-in-out infinite}
+.ribbon.b{top:52%;opacity:.55;animation-delay:-8s}
+@keyframes sway{0%,100%{transform:rotate(-11deg) skewY(-4deg) translateX(0)}50%{transform:rotate(-8deg) skewY(-2deg) translateX(3%)}}
+.grid3d{position:absolute;left:-25%;right:-25%;bottom:-12%;height:56%;
+  background-image:linear-gradient(#BE185D26 1px,transparent 1px),linear-gradient(90deg,#BE185D26 1px,transparent 1px);
+  background-size:64px 64px;transform:rotateX(72deg);transform-origin:bottom;
+  -webkit-mask-image:linear-gradient(transparent,#000 45%);mask-image:linear-gradient(transparent,#000 45%)}
+.tilt{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.3,1)}
+.wr{display:inline-block;overflow:hidden;vertical-align:top}
+.wr i{display:inline-block;font-style:normal;transform:translateY(105%);opacity:0;
+  transition:transform .85s cubic-bezier(.16,1,.3,1),opacity .6s ease;transition-delay:var(--wd,0ms)}
+.wr.on i{transform:none;opacity:1}
+.para{will-change:transform}
+
 .glass{background:#FFFFFFB8;backdrop-filter:blur(22px) saturate(1.3);border:1px solid #FFFFFF;border-radius:calc(var(--r) + 10px);padding:clamp(30px,4.4vw,64px);box-shadow:0 2px 6px #00000012,0 40px 90px #0000001F}
 .sky{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .sky .c{position:absolute;border-radius:50%;background:#FFFFFF;filter:blur(42px)}
@@ -179,13 +204,14 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .hills{position:absolute;left:0;right:0;bottom:-1px;z-index:1;pointer-events:none}
 .rv{opacity:0;transition:opacity .8s cubic-bezier(.2,.7,.3,1),transform .8s cubic-bezier(.2,.7,.3,1),clip-path .9s cubic-bezier(.2,.7,.3,1);transition-delay:var(--d,0ms)}
 
+.rv{clip-path:inset(0 0 100% 0);transform:translateY(14px)}
 
 
 
 .rv.on{opacity:1;transform:none;clip-path:inset(0 0 0 0)}
 
 :focus-visible{outline:2.5px solid var(--ac);outline-offset:3px;border-radius:4px}
-::selection{background:#1D4ED840}
+::selection{background:#BE185D40}
 
 @media(max-width:860px){
  .hgrid{grid-template-columns:repeat(4,1fr)}
@@ -201,6 +227,8 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 @media (prefers-reduced-motion:reduce){
  *{animation:none!important;transition:none!important}
  .rv{opacity:1;transform:none;clip-path:none}
+ .wr i{transform:none;opacity:1}
+ .orb,.ribbon,.grid3d{display:none}
  html{scroll-behavior:auto}
 }</style>
 </head><body>
@@ -212,37 +240,47 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
   <button class="burger" aria-label="Меню"><i></i><i></i></button>
 </div></nav>
 <div class="menu"><a href="#services">Услуги</a><a href="#about">О нас</a><a href="#gallery">Галерея</a><a href="#hours">Часы</a><a href="#contacts">Контакты</a></div>
-<header style="padding:clamp(130px,17vw,210px) 0 clamp(70px,9vw,120px);position:relative"><div class="mesh"><i></i><i></i><i></i></div><div class="w" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(30px,5vw,70px);align-items:center">
-      <div><div class="eyebrow rv">кофейня · Астана</div><h1 class="rv" style="--d:60ms">Кофе, ради которого встают раньше</h1>
-      <p class="lead rv" style="--d:140ms">Обжариваем сами, варим на двух зёрнах и печём завтраки до полудня.</p>
-      <div class="rv" style="--d:220ms;margin:30px 0 22px;display:flex;gap:14px;flex-wrap:wrap"><a class="btn" href="#contacts"><span>Смотреть меню</span></a><a class="btn o" href="tel:+7 701 555 33 22"><span>+7 701 555 33 22</span></a></div>
-      <div class="rv" style="--d:300ms"><span class="pill" data-open-badge>Часы работы</span></div></div>
-      <div class="art  rv" style="--d:180ms"></div></div></header>
-<section class="s line" id="faq"><div class="w n">
-    <div class="head"><div class="eyebrow rv">Вопросы</div><h2 class="rv" style="--d:60ms">Коротко о главном</h2></div>
-    <div class="rv" style="--d:120ms"><details><summary>Есть безлактозное молоко?</summary><p>Овсяное, миндальное и безлактозное коровье.</p></details><details><summary>Можно с собакой?</summary><p>Да, на летней террасе.</p></details><details><summary>Бронируете столы?</summary><p>Нет, но утром почти всегда есть места.</p></details></div></div></section><section class="s tint" id="gallery"><div class="w">
-    <div class="head"><div class="eyebrow rv">Галерея</div><h2 class="rv" style="--d:60ms">Как у нас</h2></div>
-    <div class="g g3"><div class="art  rv" style="--d:0ms"></div><div class="art v2 rv" style="--d:90ms"></div><div class="art v3 rv" style="--d:180ms"></div></div></div></section><section class="s tint" id="services"><div class="w"><div class="head"><div class="eyebrow rv">Услуги</div><h2 class="rv" style="--d:60ms">Меню</h2></div>
-      <div class="rows"><div class="srow rv" style="--d:0ms">
-        <div><h3>Эспрессо и фильтр</h3><p>Два зерна на выбор, каждую неделю новая партия.</p></div>
-        <div class="srow-price">от 900 ₸</div></div><div class="srow rv" style="--d:70ms">
-        <div><h3>Завтраки</h3><p>Сырники, каша, яйца бенедикт — до 12:00.</p></div>
-        <div class="srow-price">от 2 200 ₸</div></div><div class="srow rv" style="--d:140ms">
-        <div><h3>Выпечка</h3><p>Печём утром, к вечеру обычно разбирают.</p></div>
-        <div class="srow-price">от 800 ₸</div></div><div class="srow rv" style="--d:210ms">
-        <div><h3>Зерно с собой</h3><p>Пачка 250 грамм, мелем под ваш способ.</p></div>
-        <div class="srow-price">4 500 ₸</div></div></div></div></section><section class="s line"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:start">
+<header style="padding:clamp(130px,17vw,210px) 0 clamp(70px,9vw,120px);position:relative"><div class="depth"><i class="ribbon para" data-para="0.12"></i><i class="ribbon b para" data-para="0.22"></i></div><div class="mesh"><i></i><i></i><i></i></div><div class="w" style="text-align:center;max-width:960px">
+      <div class="eyebrow rv">кофейня · Астана</div><h1 class="rv" style="--d:60ms">Кофе, ради которого встают раньше</h1>
+      <p class="lead rv" style="--d:140ms;margin:0 auto 34px">Обжариваем сами, варим на двух зёрнах и печём завтраки до полудня.</p>
+      <div class="rv" style="--d:220ms;display:flex;gap:14px;justify-content:center;flex-wrap:wrap"><a class="btn" href="#contacts"><span>Смотреть меню</span></a><a class="btn o" href="tel:+7 701 555 33 22"><span>+7 701 555 33 22</span></a></div>
+      <div class="rv" style="--d:300ms;margin-top:34px"><span class="pill" data-open-badge>Часы работы</span></div></div></header>
+<section class="s line"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:start">
     <div class="sticky"><div class="eyebrow rv">Как это устроено</div><h2 class="rv" style="--d:60ms">Путь зерна</h2></div>
     <div><div class="proc rv" style="--d:0ms"><em>01</em>
       <div><h3>Зелёное зерно</h3><p>Привозим партию и пробуем вслепую.</p></div></div><div class="proc rv" style="--d:90ms"><em>02</em>
       <div><h3>Обжарка раз в неделю</h3><p>Свой ростер, профиль под каждую партию.</p></div></div><div class="proc rv" style="--d:180ms"><em>03</em>
-      <div><h3>Ваша чашка</h3><p>Между обжаркой и чашкой меньше недели.</p></div></div></div></div></div></section><section class="s line" id="about"><div class="w" style="text-align:center;max-width:760px">
-      <div class="eyebrow rv">О нас</div><h2 class="rv" style="--d:60ms">О нас</h2>
-      <p class="lead rv" style="--d:140ms;margin:0 auto">Маленькая кофейня на две витрины. Начинали с одной кофемашины дома, теперь обжариваем на своём ростере. Всё зерно приезжает зелёным.</p></div></section><section class="s line"><div class="w"><div class="stats"><div class="stat rv" style="--d:0ms"><b>7:00</b><span>открываемся</span></div><div class="stat rv" style="--d:90ms"><b>2</b><span>зерна в меню</span></div></div></div></section><section class="s tint" id="hours"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:start">
-      <div class="sticky"><div class="eyebrow rv">Режим</div><h2 class="rv" style="--d:60ms">Часы работы</h2>
-        <div class="rv" style="--d:140ms;margin-bottom:18px"><span class="pill" data-open-badge>Часы работы</span></div>
-        <p class="rv" style="--d:180ms;color:var(--mu);font-size:14.5px">Время по Астане, UTC+5. Метка обновляется сама.</p></div>
-      <table class="hrs rv" style="--d:120ms"><tr data-day="mon"><td>Понедельник</td><td>07:00 – 21:00</td></tr><tr data-day="tue"><td>Вторник</td><td>07:00 – 21:00</td></tr><tr data-day="wed"><td>Среда</td><td>07:00 – 21:00</td></tr><tr data-day="thu"><td>Четверг</td><td>07:00 – 21:00</td></tr><tr data-day="fri"><td>Пятница</td><td>07:00 – 23:00</td></tr><tr data-day="sat"><td>Суббота</td><td>08:00 – 23:00</td></tr><tr data-day="sun"><td>Воскресенье</td><td>08:00 – 20:00</td></tr></table></div></div></section><section class="s"><div class="w"><div class="cta rv">
+      <div><h3>Ваша чашка</h3><p>Между обжаркой и чашкой меньше недели.</p></div></div></div></div></div></section><section class="s line" id="faq"><div class="w n">
+    <div class="head"><div class="eyebrow rv">Вопросы</div><h2 class="rv" style="--d:60ms">Коротко о главном</h2></div>
+    <div class="rv" style="--d:120ms"><details><summary>Есть безлактозное молоко?</summary><p>Овсяное, миндальное и безлактозное коровье.</p></details><details><summary>Можно с собакой?</summary><p>Да, на летней террасе.</p></details></div></div></section><section class="s tint" id="services"><div class="w"><div class="wn"><div class="head"><div class="eyebrow rv">Услуги</div><h2 class="rv" style="--d:60ms">Меню</h2></div>
+    <div class="plist2"><div class="pitem rv" style="--d:0ms">
+      <div class="pitem-top"><span class="pitem-name">Эспрессо и фильтр</span><span class="pitem-dots"></span>
+      <span class="pitem-price">от 900 ₸</span></div>
+      <p class="pitem-text">Два зерна на выбор, каждую неделю новая партия.</p></div><div class="pitem rv" style="--d:60ms">
+      <div class="pitem-top"><span class="pitem-name">Завтраки</span><span class="pitem-dots"></span>
+      <span class="pitem-price">от 2 200 ₸</span></div>
+      <p class="pitem-text">Сырники, каша, яйца бенедикт — до 12:00.</p></div><div class="pitem rv" style="--d:120ms">
+      <div class="pitem-top"><span class="pitem-name">Выпечка</span><span class="pitem-dots"></span>
+      <span class="pitem-price">от 800 ₸</span></div>
+      <p class="pitem-text">Печём утром, к вечеру обычно разбирают.</p></div><div class="pitem rv" style="--d:180ms">
+      <div class="pitem-top"><span class="pitem-name">Зерно с собой</span><span class="pitem-dots"></span>
+      <span class="pitem-price">4 500 ₸</span></div>
+      <p class="pitem-text">Пачка 250 грамм, мелем под ваш способ.</p></div></div></div></div></section><section class="s line" id="about"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:center">
+      <div><div class="eyebrow rv">О нас</div><h2 class="rv" style="--d:60ms">О нас</h2>
+      <p class="lead rv" style="--d:140ms">Маленькая кофейня на две витрины. Начинали с одной кофемашины дома, теперь обжариваем на своём ростере.</p></div><div class="art v2 rv" style="--d:200ms"></div></div></div></section><section class="s tint" id="gallery"><div class="w">
+    <div class="head"><div class="eyebrow rv">Галерея</div><h2 class="rv" style="--d:60ms">Как у нас</h2></div>
+    <div class="g g3"><div class="art  rv" style="--d:0ms"></div><div class="art v2 rv" style="--d:90ms"></div><div class="art v3 rv" style="--d:180ms"></div></div></div></section><section class="s line"><div class="w"><div class="stats"><div class="stat rv" style="--d:0ms"><b>2</b><span>зерна в меню</span></div><div class="stat rv" style="--d:90ms"><b>250</b><span>грамм в пачке</span></div></div></div></section><section class="s tint" id="hours"><div class="w" style="text-align:center">
+      <div class="eyebrow rv">Режим</div><h2 class="rv" style="--d:60ms">Часы работы</h2>
+      <div class="rv" style="--d:120ms;margin-bottom:26px"><span class="pill" data-open-badge>Часы работы</span></div>
+      <div class="hgrid"><div class="hcell rv" data-day="mon" style="--d:0ms">
+        <span>По</span><b>07:00<br>21:00</b></div><div class="hcell rv" data-day="tue" style="--d:50ms">
+        <span>Вт</span><b>07:00<br>21:00</b></div><div class="hcell rv" data-day="wed" style="--d:100ms">
+        <span>Ср</span><b>07:00<br>21:00</b></div><div class="hcell rv" data-day="thu" style="--d:150ms">
+        <span>Че</span><b>07:00<br>21:00</b></div><div class="hcell rv" data-day="fri" style="--d:200ms">
+        <span>Пя</span><b>07:00<br>23:00</b></div><div class="hcell rv" data-day="sat" style="--d:250ms">
+        <span>Су</span><b>08:00<br>23:00</b></div><div class="hcell rv" data-day="sun" style="--d:300ms">
+        <span>Во</span><b>08:00<br>20:00</b></div></div>
+      <p class="rv" style="--d:200ms;color:var(--mu);font-size:14px;margin-top:20px">Время по Астане, UTC+5</p></div></section><section class="s"><div class="w"><div class="cta rv">
     <h2>Заходите с утра</h2>
     <p class="lead">Открываемся в семь.</p>
     <a class="btn" href="tel:+7 701 555 33 22"><span>+7 701 555 33 22</span></a>
@@ -257,7 +295,7 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
     </div></div></section>
 <footer><div class="w" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
 <span>© 2026 Мама Кофе, Астана</span>
-<span>Сведения на странице размещены владельцем бизнеса. Сайт собран в WeDesign · DNA-650C53</span></div></footer>
+<span>Сведения на странице размещены владельцем бизнеса. Сайт собран в WeDesign · DNA-287150</span></div></footer>
 <a class="wa" href="https://wa.me/77015553322" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-1.5-.6-3.4-1.7-4.9-3.8-.6-.8-1-1.7-1.1-2.5-.1-.8.2-1.5.6-1.9.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.4.7 1 1.3 1.6 1.8.6.4 1.1.6 1.3.7.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg></a>
 
 <script>
@@ -267,6 +305,65 @@ var els=document.querySelectorAll('.rv');
 if(R){for(var i=0;i<els.length;i++)els[i].classList.add('on');}
 else{var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}})},{threshold:.1,rootMargin:'0px 0px -8%'});
 for(var j=0;j<els.length;j++)io.observe(els[j]);}
+
+/* заголовок по словам */
+var wraps=document.querySelectorAll('.wr');
+if(R){for(var w=0;w<wraps.length;w++)wraps[w].classList.add('on');}
+else{setTimeout(function(){for(var w=0;w<wraps.length;w++)wraps[w].classList.add('on');},180);}
+
+/* наклон карточек за курсором — только на мыши, не на касании */
+if(!R && matchMedia('(hover:hover) and (pointer:fine)').matches){
+  var tilts=document.querySelectorAll('.tilt');
+  for(var t=0;t<tilts.length;t++){(function(el){
+    el.addEventListener('mousemove',function(e){
+      var b=el.getBoundingClientRect();
+      var x=(e.clientX-b.left)/b.width-0.5, y=(e.clientY-b.top)/b.height-0.5;
+      el.style.transform='perspective(700px) rotateY('+(x*7).toFixed(2)+'deg) rotateX('+(-y*7).toFixed(2)+'deg) translateY(-5px)';
+    });
+    el.addEventListener('mouseleave',function(){ el.style.transform=''; });
+  })(tilts[t]);}
+}
+
+/* параллакс: дальние слои двигаются медленнее */
+var paras=document.querySelectorAll('.para');
+if(!R && paras.length){
+  var ticking=false;
+  var onPara=function(){
+    if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){
+      var y=window.scrollY||0;
+      for(var i=0;i<paras.length;i++){
+        var k=parseFloat(paras[i].getAttribute('data-para'))||0.15;
+        paras[i].style.transform='translate3d(0,'+(y*k).toFixed(1)+'px,0)';
+      }
+      ticking=false;
+    });
+  };
+  onPara(); window.addEventListener('scroll',onPara,{passive:true});
+}
+
+/* цифры досчитываются при появлении */
+var nums=document.querySelectorAll('.stat b');
+if(!R && nums.length){
+  var nio=new IntersectionObserver(function(en){
+    en.forEach(function(e){
+      if(!e.isIntersecting) return;
+      nio.unobserve(e.target);
+      var raw=e.target.textContent.trim();
+      var m=raw.match(/^(D*)(d+)(.*)$/);
+      if(!m) return;
+      var pre=m[1], end=parseInt(m[2],10), post=m[3], step=0, steps=28;
+      if(end>999) return;
+      var id=setInterval(function(){
+        step++;
+        var v=Math.round(end*(1-Math.pow(1-step/steps,3)));
+        e.target.textContent=pre+v+post;
+        if(step>=steps){clearInterval(id);e.target.textContent=raw;}
+      },26);
+    });
+  },{threshold:.4});
+  for(var n=0;n<nums.length;n++) nio.observe(nums[n]);
+}
 
 var nav=document.querySelector('.nav'),bar=document.querySelector('.bar');
 function onScroll(){

@@ -73,7 +73,8 @@ const FONTS = [
 ];
 
 const HEROES  = ['mesh','sticky','marquee','overlap','bigtype','rule','gradient','luxe','glass','sky'];
-const MOTION  = ['up','mask','stagger','scale'];
+const MOTION  = ['up','mask','stagger','scale','words'];
+const DEPTH   = ['orb','ribbon','grid3d','none'];
 const SHAPE   = [0, 4, 12, 20, 28, 999];
 const NAVS    = ['float', 'plain', 'rule'];
 const SECTIONS = ['stats','services','about','process','gallery','reviews','faq'];
@@ -161,6 +162,9 @@ function makeDNA(hint){
     f: rnd(FONTS.length),
     h: rnd(HEROES.length),
     m: rnd(MOTION.length),
+    dp: rnd(DEPTH.length),
+    tilt: rnd(3) > 0,
+    para: rnd(4) > 0,
     r: rnd(SHAPE.length),
     nv: rnd(NAVS.length),
     ls: rnd(LAY_SERVICES.length),
@@ -174,7 +178,7 @@ function makeDNA(hint){
 }
 
 function dnaKey(d){
-  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
+  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,d.dp,+d.tilt,+d.para,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
 }
 function dnaCode(d){
   return 'DNA-' + crypto.createHash('sha256').update(dnaKey(d)).digest('hex').slice(0,6).toUpperCase();
@@ -376,6 +380,31 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .hline{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:15px 0;border-bottom:1px solid var(--hair);font-size:17px}
 .hline b{font-variant-numeric:tabular-nums;color:var(--mu);font-weight:500}
 .hline.today b,.hline.today span{color:var(--ac);font-weight:700}
+/* ——— объём ——— */
+.depth{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;perspective:900px}
+.orb{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 30% 26%, #FFFFFF55, ${p.g1} 42%, ${p.g2} 78%, ${p.mode==='dark'?'#000':'#00000022'} 100%);
+  box-shadow:inset -18px -22px 60px ${p.mode==='dark'?'#00000073':'#00000038'}, 0 40px 90px ${p.ac}2E;
+  animation:float 14s ease-in-out infinite}
+.orb.a{width:min(30vw,340px);height:min(30vw,340px);top:8%;right:-6%}
+.orb.b{width:min(14vw,150px);height:min(14vw,150px);bottom:12%;left:6%;animation-delay:-5s;opacity:.75}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-26px) rotate(6deg)}}
+.ribbon{position:absolute;width:150%;height:230px;left:-25%;top:18%;
+  background:linear-gradient(100deg,transparent,${p.ac}2E 22%,${p.g2}38 52%,transparent 88%);
+  filter:blur(2px);transform:rotate(-11deg) skewY(-4deg);animation:sway 18s ease-in-out infinite}
+.ribbon.b{top:52%;opacity:.55;animation-delay:-8s}
+@keyframes sway{0%,100%{transform:rotate(-11deg) skewY(-4deg) translateX(0)}50%{transform:rotate(-8deg) skewY(-2deg) translateX(3%)}}
+.grid3d{position:absolute;left:-25%;right:-25%;bottom:-12%;height:56%;
+  background-image:linear-gradient(${p.ac}26 1px,transparent 1px),linear-gradient(90deg,${p.ac}26 1px,transparent 1px);
+  background-size:64px 64px;transform:rotateX(72deg);transform-origin:bottom;
+  -webkit-mask-image:linear-gradient(transparent,#000 45%);mask-image:linear-gradient(transparent,#000 45%)}
+.tilt{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.3,1)}
+.wr{display:inline-block;overflow:hidden;vertical-align:top}
+.wr i{display:inline-block;font-style:normal;transform:translateY(105%);opacity:0;
+  transition:transform .85s cubic-bezier(.16,1,.3,1),opacity .6s ease;transition-delay:var(--wd,0ms)}
+.wr.on i{transform:none;opacity:1}
+.para{will-change:transform}
+
 .glass{background:${p.mode==='dark'?'#FFFFFF0F':'#FFFFFFB8'};backdrop-filter:blur(22px) saturate(1.3);border:1px solid ${p.mode==='dark'?'#FFFFFF26':'#FFFFFF'};border-radius:calc(var(--r) + 10px);padding:clamp(30px,4.4vw,64px);box-shadow:0 2px 6px #00000012,0 40px 90px ${p.mode==='dark'?'#00000059':'#0000001F'}}
 .sky{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 .sky .c{position:absolute;border-radius:50%;background:${p.mode==='dark'?'#FFFFFF14':'#FFFFFF'};filter:blur(42px)}
@@ -384,10 +413,11 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .sky .c:nth-child(3){width:30vw;height:16vw;top:16vw;left:34vw;opacity:${p.mode==='dark'?'.06':'.55'}}
 .hills{position:absolute;left:0;right:0;bottom:-1px;z-index:1;pointer-events:none}
 .rv{opacity:0;transition:opacity .8s cubic-bezier(.2,.7,.3,1),transform .8s cubic-bezier(.2,.7,.3,1),clip-path .9s cubic-bezier(.2,.7,.3,1);transition-delay:var(--d,0ms)}
-${dna.m==='up'      ? '.rv{transform:translateY(34px)}' : ''}
-${dna.m==='mask'    ? '.rv{clip-path:inset(0 0 100% 0);transform:translateY(14px)}' : ''}
-${dna.m==='stagger' ? '.rv{transform:translateY(24px) translateX(-10px)}' : ''}
-${dna.m==='scale'   ? '.rv{transform:scale(.955)}' : ''}
+${MOTION[dna.m]==='up'      ? '.rv{transform:translateY(34px)}' : ''}
+${MOTION[dna.m]==='mask'    ? '.rv{clip-path:inset(0 0 100% 0);transform:translateY(14px)}' : ''}
+${MOTION[dna.m]==='stagger' ? '.rv{transform:translateY(24px) translateX(-10px)}' : ''}
+${MOTION[dna.m]==='scale'   ? '.rv{transform:scale(.955)}' : ''}
+${MOTION[dna.m]==='words'   ? '.rv{transform:translateY(16px)}' : ''}
 .rv.on{opacity:1;transform:none;clip-path:inset(0 0 0 0)}
 
 :focus-visible{outline:2.5px solid var(--ac);outline-offset:3px;border-radius:4px}
@@ -407,6 +437,8 @@ ${dna.m==='scale'   ? '.rv{transform:scale(.955)}' : ''}
 @media (prefers-reduced-motion:reduce){
  *{animation:none!important;transition:none!important}
  .rv{opacity:1;transform:none;clip-path:none}
+ .wr i{transform:none;opacity:1}
+ .orb,.ribbon,.grid3d{display:none}
  html{scroll-behavior:auto}
 }`;
 }
@@ -414,6 +446,26 @@ ${dna.m==='scale'   ? '.rv{transform:scale(.955)}' : ''}
 /* ══════════════════════════ блоки ══════════════════════════ */
 
 function mesh(on){ return on ? '<div class="mesh"><i></i><i></i><i></i></div>' : ''; }
+
+// Объёмный слой за первым экраном: шары, лента или уходящая сетка.
+function depth(dna){
+  const kind = DEPTH[dna.dp];
+  if (kind === 'orb')
+    return '<div class="depth"><i class="orb a para" data-para="0.18"></i><i class="orb b para" data-para="0.32"></i></div>';
+  if (kind === 'ribbon')
+    return '<div class="depth"><i class="ribbon para" data-para="0.12"></i><i class="ribbon b para" data-para="0.22"></i></div>';
+  if (kind === 'grid3d')
+    return '<div class="depth"><i class="grid3d"></i></div>';
+  return '';
+}
+
+// Заголовок, который выезжает по словам.
+function words(text, dna){
+  if (MOTION[dna.m] !== 'words') return esc(text);
+  return String(text).split(/\s+/).map(function(w, i){
+    return '<span class="wr" style="--wd:' + (i * 70) + 'ms"><i>' + esc(w) + '</i></span>';
+  }).join(' ');
+}
 
 // Вторая линия защиты: даже если в данные попала ссылка вида javascript:,
 // в разметку она не выйдет. Проверяется КАЖДЫЙ адрес, попадающий в href или src.
@@ -442,7 +494,7 @@ function heroArt(d, cls){
   const ph = photos(d);
   if (ph[0])
     return `<div class="ph rv" style="--d:180ms"><img src="${esc(ph[0])}" alt="${esc(d.name)}"></div>`;
-  return `<div class="art ${cls||''} rv" style="--d:180ms"></div>`;
+  return `<div class="art ${cls||''} rv para" data-para="0.1" style="--d:180ms"></div>`;
 }
 
 function marquee(d){
@@ -464,32 +516,34 @@ function hero(dna, d){
   const tel = telNum ? btn('tel:' + telNum, telNum, true) : '';
   const pill = '<span class="pill" data-open-badge>Часы работы</span>';
   const pad = 'padding:clamp(130px,17vw,210px) 0 clamp(70px,9vw,120px)';
+  const dep = depth(dna);
+  const H1 = words(d.headline, dna);
 
   if (kind === 'mesh')
-    return `<header style="${pad};position:relative">${mesh(dna.mesh)}<div class="w" style="text-align:center;max-width:960px">
-      ${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+    return `<header style="${pad};position:relative">${dep}${mesh(dna.mesh)}<div class="w" style="text-align:center;max-width:960px">
+      ${eyebrow}<h1 class="rv" style="--d:60ms">${H1}</h1>
       <p class="lead rv" style="--d:140ms;margin:0 auto 34px">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">${cta}${tel}</div>
       <div class="rv" style="--d:300ms;margin-top:34px">${pill}</div></div></header>`;
 
   if (kind === 'sticky')
-    return `<header style="${pad};position:relative">${mesh(dna.mesh)}<div class="w" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(30px,5vw,70px);align-items:center">
-      <div>${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+    return `<header style="${pad};position:relative">${dep}${mesh(dna.mesh)}<div class="w" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(30px,5vw,70px);align-items:center">
+      <div>${eyebrow}<h1 class="rv" style="--d:60ms">${H1}</h1>
       <p class="lead rv" style="--d:140ms">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;margin:30px 0 22px;display:flex;gap:14px;flex-wrap:wrap">${cta}${tel}</div>
       <div class="rv" style="--d:300ms">${pill}</div></div>
       ${heroArt(d)}</div></header>`;
 
   if (kind === 'marquee')
-    return `<header style="padding:clamp(126px,16vw,190px) 0 0;position:relative">${mesh(dna.mesh)}<div class="w" style="max-width:900px">
-      ${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+    return `<header style="padding:clamp(126px,16vw,190px) 0 0;position:relative">${dep}${mesh(dna.mesh)}<div class="w" style="max-width:900px">
+      ${eyebrow}<h1 class="rv" style="--d:60ms">${H1}</h1>
       <p class="lead rv" style="--d:140ms">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;margin:32px 0 46px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">${cta}${tel}${pill}</div></div>
       ${marquee(d)}</header>`;
 
   if (kind === 'overlap')
-    return `<header style="${pad};position:relative">${mesh(dna.mesh)}<div class="w">
-      ${eyebrow}<h1 class="rv" style="--d:60ms;max-width:13ch">${esc(d.headline)}</h1>
+    return `<header style="${pad};position:relative">${dep}${mesh(dna.mesh)}<div class="w">
+      ${eyebrow}<h1 class="rv" style="--d:60ms;max-width:13ch">${H1}</h1>
       <div class="g g2" style="margin-top:42px;align-items:end">
         <div><p class="lead rv" style="--d:140ms">${esc(d.subheadline)}</p>
         <div class="rv" style="--d:220ms;margin-top:26px;display:flex;gap:14px;flex-wrap:wrap">${cta}${tel}</div>
@@ -497,16 +551,16 @@ function hero(dna, d){
         ${heroArt(d,'w')}</div></div></header>`;
 
   if (kind === 'bigtype')
-    return `<header style="${pad};position:relative">${mesh(dna.mesh)}<div class="w">
-      ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(46px,11vw,150px);line-height:.9">${esc(d.name)}</h1>
+    return `<header style="${pad};position:relative">${dep}${mesh(dna.mesh)}<div class="w">
+      ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(46px,11vw,150px);line-height:.9">${words(d.name, dna)}</h1>
       <div class="g g2" style="margin-top:36px;align-items:start">
         <p class="lead rv" style="--d:140ms">${esc(d.headline)}. ${esc(d.subheadline)}</p>
         <div class="rv" style="--d:220ms;display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start">${cta}${tel}</div></div>
       <div class="rv" style="--d:300ms;margin-top:30px">${pill}</div></div></header>`;
 
   if (kind === 'rule')
-    return `<header style="${pad};position:relative"><div class="w">
-      ${eyebrow}<h1 class="rv" style="--d:60ms;max-width:15ch">${esc(d.headline)}</h1>
+    return `<header style="${pad};position:relative">${dep}<div class="w">
+      ${eyebrow}<h1 class="rv" style="--d:60ms;max-width:15ch">${H1}</h1>
       <div style="height:1px;background:var(--hair);margin:38px 0"></div>
       <div class="g g2" style="align-items:start">
         <p class="lead rv" style="--d:140ms">${esc(d.subheadline)}</p>
@@ -514,10 +568,10 @@ function hero(dna, d){
       </div></div></header>`;
 
   if (kind === 'gradient')
-    return `<header style="${pad};position:relative;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff">
-      <div class="w" style="max-width:960px">
+    return `<header style="${pad};position:relative;overflow:hidden;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff">
+      ${dep}<div class="w" style="max-width:960px">
       <div class="eyebrow rv" style="color:#FFFFFFCC">${esc(d.category)} · ${esc(d.city)}</div>
-      <h1 class="rv" style="--d:60ms;color:#fff;max-width:14ch">${esc(d.headline)}</h1>
+      <h1 class="rv" style="--d:60ms;color:#fff;max-width:14ch">${H1}</h1>
       <p class="lead rv" style="--d:140ms;color:#FFFFFFDD">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;margin-top:32px;display:flex;gap:14px;flex-wrap:wrap">
         <a class="btn" style="background:#fff;color:#111" href="#contacts"><span>${esc(d.ctaText||'Записаться')}</span></a>
@@ -525,17 +579,17 @@ function hero(dna, d){
       </div></div></header>`;
 
   if (kind === 'glass')
-    return `<header style="${pad};position:relative;background:linear-gradient(165deg,${p_g1(d)}22,transparent 55%)">${mesh(true)}<div class="w">
-      <div class="glass">${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+    return `<header style="${pad};position:relative;overflow:hidden;background:linear-gradient(165deg,${p_g1(d)}22,transparent 55%)">${dep}${mesh(true)}<div class="w">
+      <div class="glass">${eyebrow}<h1 class="rv" style="--d:60ms">${H1}</h1>
       <p class="lead rv" style="--d:140ms">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;margin:30px 0 20px;display:flex;gap:14px;flex-wrap:wrap">${cta}${tel}</div>
       <div class="rv" style="--d:300ms">${pill}</div></div></div></header>`;
 
   if (kind === 'sky')
     return `<header style="padding:clamp(130px,17vw,200px) 0 0;position:relative;overflow:hidden;background:linear-gradient(180deg,${p_g1(d)}26,transparent 62%)">
-      <div class="sky"><i class="c"></i><i class="c"></i><i class="c"></i></div>
+      ${dep}<div class="sky"><i class="c"></i><i class="c"></i><i class="c"></i></div>
       <div class="w" style="text-align:center;max-width:940px;padding-bottom:clamp(80px,11vw,150px)">
-      ${eyebrow}<h1 class="rv" style="--d:60ms">${esc(d.headline)}</h1>
+      ${eyebrow}<h1 class="rv" style="--d:60ms">${H1}</h1>
       <p class="lead rv" style="--d:140ms;margin:0 auto 32px">${esc(d.subheadline)}</p>
       <div class="rv" style="--d:220ms;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">${cta}${tel}</div>
       <div class="rv" style="--d:300ms;margin-top:30px">${pill}</div></div>
@@ -544,8 +598,8 @@ function hero(dna, d){
         <path d="M0 116c260-40 430 14 700 2s470-56 740-14v36H0z" fill="var(--surf)"/>
       </svg></header>`;
 
-  return `<header style="padding:clamp(150px,20vw,240px) 0 clamp(80px,10vw,130px);position:relative"><div class="w n" style="text-align:center">
-    ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(34px,5.4vw,64px)">${esc(d.headline)}</h1>
+  return `<header style="padding:clamp(150px,20vw,240px) 0 clamp(80px,10vw,130px);position:relative">${dep}<div class="w n" style="text-align:center">
+    ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(34px,5.4vw,64px)">${H1}</h1>
     <p class="lead rv" style="--d:140ms;margin:0 auto 36px">${esc(d.subheadline)}</p>
     <div class="rv" style="--d:220ms;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">${cta}${tel}</div>
     <div class="rv" style="--d:300ms;margin-top:36px">${pill}</div></div></header>`;
@@ -569,7 +623,7 @@ function servicesBlock(d, dna){
   if (kind === 'cards')
     return `<section class="s tint" id="services"><div class="w">${head}
       <div class="g g3">${d.services.map(function(s,i){
-        return `<div class="card rv" style="--d:${i*80}ms">
+        return `<div class="card rv${dna && dna.tilt ? ' tilt' : ''}" style="--d:${i*80}ms">
         <span class="idx">${String(i+1).padStart(2,'0')}</span><h3>${esc(s.name)}</h3><p>${esc(s.text)}</p>
         ${s.price?`<div class="price grad">${esc(s.price)}</div>`:''}</div>`;
       }).join('')}</div></div></section>`;
@@ -749,6 +803,65 @@ var els=document.querySelectorAll('.rv');
 if(R){for(var i=0;i<els.length;i++)els[i].classList.add('on');}
 else{var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}})},{threshold:.1,rootMargin:'0px 0px -8%'});
 for(var j=0;j<els.length;j++)io.observe(els[j]);}
+
+/* заголовок по словам */
+var wraps=document.querySelectorAll('.wr');
+if(R){for(var w=0;w<wraps.length;w++)wraps[w].classList.add('on');}
+else{setTimeout(function(){for(var w=0;w<wraps.length;w++)wraps[w].classList.add('on');},180);}
+
+/* наклон карточек за курсором — только на мыши, не на касании */
+if(!R && matchMedia('(hover:hover) and (pointer:fine)').matches){
+  var tilts=document.querySelectorAll('.tilt');
+  for(var t=0;t<tilts.length;t++){(function(el){
+    el.addEventListener('mousemove',function(e){
+      var b=el.getBoundingClientRect();
+      var x=(e.clientX-b.left)/b.width-0.5, y=(e.clientY-b.top)/b.height-0.5;
+      el.style.transform='perspective(700px) rotateY('+(x*7).toFixed(2)+'deg) rotateX('+(-y*7).toFixed(2)+'deg) translateY(-5px)';
+    });
+    el.addEventListener('mouseleave',function(){ el.style.transform=''; });
+  })(tilts[t]);}
+}
+
+/* параллакс: дальние слои двигаются медленнее */
+var paras=document.querySelectorAll('.para');
+if(!R && paras.length){
+  var ticking=false;
+  var onPara=function(){
+    if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){
+      var y=window.scrollY||0;
+      for(var i=0;i<paras.length;i++){
+        var k=parseFloat(paras[i].getAttribute('data-para'))||0.15;
+        paras[i].style.transform='translate3d(0,'+(y*k).toFixed(1)+'px,0)';
+      }
+      ticking=false;
+    });
+  };
+  onPara(); window.addEventListener('scroll',onPara,{passive:true});
+}
+
+/* цифры досчитываются при появлении */
+var nums=document.querySelectorAll('.stat b');
+if(!R && nums.length){
+  var nio=new IntersectionObserver(function(en){
+    en.forEach(function(e){
+      if(!e.isIntersecting) return;
+      nio.unobserve(e.target);
+      var raw=e.target.textContent.trim();
+      var m=raw.match(/^(\D*)(\d+)(.*)$/);
+      if(!m) return;
+      var pre=m[1], end=parseInt(m[2],10), post=m[3], step=0, steps=28;
+      if(end>999) return;
+      var id=setInterval(function(){
+        step++;
+        var v=Math.round(end*(1-Math.pow(1-step/steps,3)));
+        e.target.textContent=pre+v+post;
+        if(step>=steps){clearInterval(id);e.target.textContent=raw;}
+      },26);
+    });
+  },{threshold:.4});
+  for(var n=0;n<nums.length;n++) nio.observe(nums[n]);
+}
 
 var nav=document.querySelector('.nav'),bar=document.querySelector('.bar');
 function onScroll(){
