@@ -74,7 +74,9 @@ const FONTS = [
 
 const HEROES  = ['mesh','sticky','marquee','overlap','bigtype','rule','gradient','luxe','glass','sky'];
 const MOTION  = ['up','mask','stagger','scale','words'];
-const DEPTH   = ['orb','ribbon','grid3d','none'];
+// Никаких парящих шаров и радужных лент: это первый признак шаблонной работы.
+// Осталась только структурная графика — линии и сетка.
+const DEPTH   = ['rule','grid3d','none','none'];
 const SHAPE   = [0, 4, 12, 20, 28, 999];
 const NAVS    = ['float', 'plain', 'rule'];
 const SECTIONS = ['stats','services','about','process','gallery','reviews','faq'];
@@ -237,14 +239,14 @@ button{font:inherit}
 .w.n{max-width:820px}
 
 h1,h2,h3{font-family:'${f.d}',Georgia,serif;font-weight:${f.dw};letter-spacing:${f.s};line-height:.98;margin:0 0 .42em;text-transform:${f.t}}
-h1{font-size:clamp(40px,7.4vw,92px)}
-h2{font-size:clamp(30px,4.6vw,58px);line-height:1.02}
+h1{font-size:clamp(34px,5vw,56px)}
+h2{font-size:clamp(26px,3.2vw,36px);line-height:1.12}
 h3{font-size:clamp(19px,1.7vw,23px);line-height:1.2;letter-spacing:-.02em}
 p{margin:0 0 1.05em}
 .lead{font-size:clamp(17px,1.55vw,21px);color:var(--mu);max-width:60ch;letter-spacing:-.01em}
 .eyebrow{display:inline-flex;align-items:center;gap:9px;font-size:11.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ac);margin-bottom:20px}
 .eyebrow:before{content:'';width:22px;height:1.5px;background:var(--ac);display:block}
-.grad{background:linear-gradient(102deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad{color:var(--ac)}
 
 ${dna.grain ? `body:before{content:'';position:fixed;inset:0;z-index:999;pointer-events:none;background-image:${GRAIN};opacity:${p.mode==='dark'?'.055':'.035'};mix-blend-mode:${p.mode==='dark'?'screen':'multiply'}}` : ''}
 .mesh{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
@@ -285,9 +287,9 @@ ${dna.nv==='rule' ? '.links a{border-radius:0;border-bottom:1.5px solid transpar
 .g{display:grid;gap:clamp(14px,1.6vw,22px)}
 .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.card{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:clamp(24px,2.6vw,34px);position:relative;overflow:hidden;box-shadow:0 1px 2px ${p.mode==='dark'?'#00000038':'#0000000A'},0 12px 30px ${p.mode==='dark'?'#00000038':'#0000000D'};transition:transform .3s cubic-bezier(.2,.7,.3,1),border-color .3s,box-shadow .3s}
+.card{background:var(--surf);border:1px solid var(--hair);border-radius:var(--r);padding:clamp(24px,2.6vw,34px);position:relative;overflow:hidden;transition:border-color .25s ease}
 .s.tint .card{background:var(--bg)}
-.card:hover{transform:translateY(-5px);border-color:${p.ac}66;box-shadow:0 2px 4px ${p.mode==='dark'?'#00000045':'#0000000F'},0 26px 60px ${p.mode==='dark'?'#00000052':'#00000017'}}
+.card:hover{border-color:${p.ac}}
 .card:before{content:'';position:absolute;inset:0;background:linear-gradient(140deg,${p.ac}12,transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
 .card:hover:before{opacity:1}
 .card p{color:var(--mu);margin:0;font-size:15.5px}
@@ -295,7 +297,7 @@ ${dna.nv==='rule' ? '.links a{border-radius:0;border-bottom:1.5px solid transpar
 .idx{font-size:12px;font-weight:700;color:var(--ac);letter-spacing:.14em;margin-bottom:14px;display:block}
 
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:clamp(20px,3vw,44px)}
-.stat b{display:block;font-family:'${f.d}',serif;font-weight:${f.dw};font-size:clamp(38px,5.4vw,70px);letter-spacing:-.05em;line-height:1;background:linear-gradient(102deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat b{display:block;font-family:'${f.d}',serif;font-weight:${f.dw};font-size:clamp(30px,3.6vw,44px);letter-spacing:-.04em;line-height:1;color:var(--ac)}
 .stat span{display:block;color:var(--mu);font-size:14.5px;margin-top:10px}
 
 .marq{overflow:hidden;padding:18px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);white-space:nowrap;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
@@ -382,22 +384,15 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 .hline.today b,.hline.today span{color:var(--ac);font-weight:700}
 /* ——— объём ——— */
 .depth{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;perspective:900px}
-.orb{position:absolute;border-radius:50%;
-  background:radial-gradient(circle at 30% 26%, #FFFFFF55, ${p.g1} 42%, ${p.g2} 78%, ${p.mode==='dark'?'#000':'#00000022'} 100%);
-  box-shadow:inset -18px -22px 60px ${p.mode==='dark'?'#00000073':'#00000038'}, 0 40px 90px ${p.ac}2E;
-  animation:float 14s ease-in-out infinite}
-.orb.a{width:min(30vw,340px);height:min(30vw,340px);top:8%;right:-6%}
-.orb.b{width:min(14vw,150px);height:min(14vw,150px);bottom:12%;left:6%;animation-delay:-5s;opacity:.75}
-@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-26px) rotate(6deg)}}
-.ribbon{position:absolute;width:150%;height:230px;left:-25%;top:18%;
-  background:linear-gradient(100deg,transparent,${p.ac}2E 22%,${p.g2}38 52%,transparent 88%);
-  filter:blur(2px);transform:rotate(-11deg) skewY(-4deg);animation:sway 18s ease-in-out infinite}
-.ribbon.b{top:52%;opacity:.55;animation-delay:-8s}
-@keyframes sway{0%,100%{transform:rotate(-11deg) skewY(-4deg) translateX(0)}50%{transform:rotate(-8deg) skewY(-2deg) translateX(3%)}}
-.grid3d{position:absolute;left:-25%;right:-25%;bottom:-12%;height:56%;
-  background-image:linear-gradient(${p.ac}26 1px,transparent 1px),linear-gradient(90deg,${p.ac}26 1px,transparent 1px);
-  background-size:64px 64px;transform:rotateX(72deg);transform-origin:bottom;
-  -webkit-mask-image:linear-gradient(transparent,#000 45%);mask-image:linear-gradient(transparent,#000 45%)}
+/* Разлиновка: вертикальные направляющие, как на макетном листе */
+.rules{position:absolute;inset:0;
+  background-image:repeating-linear-gradient(90deg,${p.mode==='dark'?'#FFFFFF0A':'#00000008'} 0 1px,transparent 1px 25%);
+  background-position:center}
+/* Сетка, уходящая к горизонту: одна тонкая линия, без свечения */
+.netgrid{position:absolute;left:-20%;right:-20%;bottom:0;height:44%;
+  background-image:linear-gradient(${p.mode==='dark'?'#FFFFFF14':'#0000000F'} 1px,transparent 1px),linear-gradient(90deg,${p.mode==='dark'?'#FFFFFF14':'#0000000F'} 1px,transparent 1px);
+  background-size:72px 72px;transform:rotateX(74deg);transform-origin:bottom;
+  -webkit-mask-image:linear-gradient(transparent,#000 60%);mask-image:linear-gradient(transparent,#000 60%)}
 .tilt{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.3,1)}
 .wr{display:inline-block;overflow:hidden;vertical-align:top}
 .wr i{display:inline-block;font-style:normal;transform:translateY(105%);opacity:0;
@@ -438,24 +433,21 @@ ${MOTION[dna.m]==='words'   ? '.rv{transform:translateY(16px)}' : ''}
  *{animation:none!important;transition:none!important}
  .rv{opacity:1;transform:none;clip-path:none}
  .wr i{transform:none;opacity:1}
- .orb,.ribbon,.grid3d{display:none}
+ .rules,.netgrid{display:none}
  html{scroll-behavior:auto}
 }`;
 }
 
 /* ══════════════════════════ блоки ══════════════════════════ */
 
-function mesh(on){ return on ? '<div class="mesh"><i></i><i></i><i></i></div>' : ''; }
+// Размытые цветные пятна убраны намеренно — это дежурный приём шаблонов.
+function mesh(){ return ''; }
 
 // Объёмный слой за первым экраном: шары, лента или уходящая сетка.
 function depth(dna){
   const kind = DEPTH[dna.dp];
-  if (kind === 'orb')
-    return '<div class="depth"><i class="orb a para" data-para="0.18"></i><i class="orb b para" data-para="0.32"></i></div>';
-  if (kind === 'ribbon')
-    return '<div class="depth"><i class="ribbon para" data-para="0.12"></i><i class="ribbon b para" data-para="0.22"></i></div>';
-  if (kind === 'grid3d')
-    return '<div class="depth"><i class="grid3d"></i></div>';
+  if (kind === 'rule') return '<div class="depth"><i class="rules"></i></div>';
+  if (kind === 'grid3d') return '<div class="depth"><i class="netgrid"></i></div>';
   return '';
 }
 
@@ -552,7 +544,7 @@ function hero(dna, d){
 
   if (kind === 'bigtype')
     return `<header style="${pad};position:relative">${dep}${mesh(dna.mesh)}<div class="w">
-      ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(46px,11vw,150px);line-height:.9">${words(d.name, dna)}</h1>
+      ${eyebrow}<h1 class="rv" style="--d:60ms;font-size:clamp(40px,7vw,76px);line-height:.98">${words(d.name, dna)}</h1>
       <div class="g g2" style="margin-top:36px;align-items:start">
         <p class="lead rv" style="--d:140ms">${esc(d.headline)}. ${esc(d.subheadline)}</p>
         <div class="rv" style="--d:220ms;display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start">${cta}${tel}</div></div>
