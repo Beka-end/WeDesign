@@ -38,7 +38,7 @@ const handler = async (req, res) => {
   };
 
   // Для тарифа «Готовый сайт» отдаём адрес опубликованной страницы.
-  if (order.status === 'paid' && order.slug) out.publicUrl = `/s/${order.slug}`;
+  if (order.status === 'paid' && order.slug) out.publicUrl = L.siteUrl(order.slug);
 
   return L.send(res, 200, out);
 };

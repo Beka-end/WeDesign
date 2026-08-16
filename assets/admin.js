@@ -154,7 +154,9 @@
           '<div><span>Телефон для связи</span><b><a href="tel:' + esc(String(o.contactPhone).replace(/[^0-9+]/g, '')) +
             '" style="color:var(--ac)">' + esc(o.contactPhone) + '</a></b></div>' +
           '<div><span>Заказ создан</span><b style="font-size:14px">' + when(o.createdAt) + '</b></div>' +
-          (o.slug ? '<div><span>Адрес сайта</span><b style="font-size:14px">/s/' + esc(o.slug) + '</b></div>' : '') +
+          (o.slug ? '<div><span>Адрес сайта</span><b style="font-size:13px"><a href="' +
+            esc(o.siteUrl || ('/s/' + o.slug)) + '" target="_blank" rel="noopener" style="color:var(--ac)">' +
+            esc((o.siteUrl || ('/s/' + o.slug)).replace(/^https?:\/\//, '')) + '</a></b></div>' : '') +
           (c.payerName ? '<div><span>Плательщик по чеку</span><b>' + esc(c.payerName) + '</b></div>' : '') +
           (c.receiptNo ? '<div><span>Номер чека</span><b class="mono">' + esc(c.receiptNo) + '</b></div>' : '') +
           (c.amountPaid ? '<div><span>Заявленная сумма</span><b class="mono">' + tenge(c.amountPaid) + ' ₸</b></div>' : '') +
@@ -179,7 +181,8 @@
             ? '<a class="btn btn-sm" target="_blank" rel="noopener" href="https://wa.me/' +
               encodeURIComponent(String(o.contactPhone).replace(/\D/g, '')) +
               '?text=' + encodeURIComponent(
-                'Здравствуйте! Ваш сайт готов и работает: ' + location.origin + '/s/' + o.slug +
+                'Здравствуйте! Ваш сайт готов и работает: ' +
+                (o.siteUrl && o.siteUrl.indexOf('http') === 0 ? o.siteUrl : location.origin + '/s/' + o.slug) +
                 '\nЭту ссылку можно ставить в Instagram, 2ГИС и на визитку. Заказ ' + o.code + '.'
               ) + '">Отправить ссылку в WhatsApp</a>'
             : '') +

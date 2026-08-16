@@ -422,17 +422,17 @@ function wrap(handler) {
 const PLANS = {
   file: {
     id: 'file',
-    title: 'Файл сайта',
+    title: 'Только файл',
     envPrice: 'PRICE_FILE',
     fallback: 4990,
     short: 'скачиваете и размещаете сами',
   },
   site: {
     id: 'site',
-    title: 'Готовый сайт',
+    title: 'Сайт под ключ',
     envPrice: 'PRICE_SITE',
     fallback: 9990,
-    short: 'живая ссылка сразу, файл тоже ваш',
+    short: 'свой адрес в интернете, от вас ноль действий',
   },
 };
 
@@ -443,6 +443,22 @@ function plan(id) {
 
 function plans() {
   return [plan('file'), plan('site')];
+}
+
+/* ------------------------------------------------------------------ */
+/* Адрес сайта клиента                                                  */
+/* Есть свой домен — отдаём поддомен вида barber-loft.домен.            */
+/* Нет — работает запасной путь /s/название на общем адресе.            */
+/* ------------------------------------------------------------------ */
+
+function siteDomain() {
+  return String(process.env.SITE_DOMAIN || '').trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
+function siteUrl(slug) {
+  if (!slug) return null;
+  const d = siteDomain();
+  return d ? `https://${slug}.${d}` : `/s/${slug}`;
 }
 
 function contacts() {
@@ -459,6 +475,8 @@ function contacts() {
 module.exports = {
   store,
   contacts,
+  siteDomain,
+  siteUrl,
   plan,
   plans,
   wrap,

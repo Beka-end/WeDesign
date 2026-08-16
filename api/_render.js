@@ -78,7 +78,7 @@ const MOTION  = ['up','mask','stagger','scale','words'];
 // Осталась только структурная графика — линии и сетка.
 const DEPTH   = ['rule','grid3d','none','none'];
 const SHAPE   = [0, 4, 12, 20, 28, 999];
-const NAVS    = ['float', 'plain', 'rule'];
+const NAVS    = ['pill', 'plain', 'rule'];
 const SECTIONS = ['stats','services','about','process','gallery','reviews','faq'];
 
 // Варианты раскладки внутри блоков — от них зависит, как выглядит сайт,
@@ -166,6 +166,7 @@ function makeDNA(hint){
     m: rnd(MOTION.length),
     dp: rnd(DEPTH.length),
     tilt: rnd(3) > 0,
+    stack: rnd(2) === 1,
     para: rnd(4) > 0,
     r: rnd(SHAPE.length),
     nv: rnd(NAVS.length),
@@ -180,7 +181,7 @@ function makeDNA(hint){
 }
 
 function dnaKey(d){
-  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,d.dp,+d.tilt,+d.para,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
+  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,d.dp,+d.tilt,+d.para,+d.stack,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
 }
 function dnaCode(d){
   return 'DNA-' + crypto.createHash('sha256').update(dnaKey(d)).digest('hex').slice(0,6).toUpperCase();
@@ -266,13 +267,20 @@ ${dna.grain ? `body:before{content:'';position:fixed;inset:0;z-index:999;pointer
 
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:background .3s ease,box-shadow .3s ease,padding .3s ease;padding:14px 0}
 .nav.stuck{background:${p.bg}D9;backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 1px 0 var(--hair)}
-${dna.nv==='float' ? '.nav.stuck{padding:9px 0}' : ''}
+${NAVS[dna.nv]==='pill' ? `
+.nav{position:fixed;top:12px;left:12px;right:12px;padding:0;background:none;box-shadow:none}
+.nav.stuck{background:none;box-shadow:none}
+.nav .in{padding:8px 8px 8px 20px;background:${p.mode==='dark'?'#0000008C':'#FFFFFFF0'};
+  backdrop-filter:blur(14px) saturate(1.3);border-radius:999px;
+  box-shadow:0 2px 8px ${p.mode==='dark'?'#00000059':'#0000000F'},0 12px 32px ${p.mode==='dark'?'#00000047':'#00000014'}}
+.nav .btn{border-radius:999px}
+` : ''}
 .nav .in{max-width:var(--maxw);margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{font-family:'${f.d}',serif;font-weight:${f.dw};font-size:20px;letter-spacing:${f.s};text-transform:${f.t}}
 .links{display:flex;gap:2px;align-items:center}
 .links a{font-size:15px;color:var(--mu);padding:9px 15px;border-radius:999px;transition:color .2s,background .2s}
 .links a:hover{color:var(--tx);background:var(--glass)}
-${dna.nv==='rule' ? '.links a{border-radius:0;border-bottom:1.5px solid transparent}.links a:hover{background:none;border-color:var(--ac)}' : ''}
+${NAVS[dna.nv]==='rule' ? '.links a{border-radius:0;border-bottom:1.5px solid transparent}.links a:hover{background:none;border-color:var(--ac)}' : ''}
 .burger{display:none;background:none;border:0;color:inherit;width:44px;height:44px;cursor:pointer}
 .burger i{display:block;width:22px;height:1.8px;background:currentColor;margin:5px auto}
 .menu{position:fixed;inset:0;z-index:99;background:${p.bg}F7;backdrop-filter:blur(20px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px}
@@ -351,9 +359,25 @@ details p{color:var(--mu);margin:0 0 24px;max-width:64ch;font-size:16px}
 
 footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size:14px}
 
-.wa{position:fixed;right:20px;bottom:20px;z-index:80;width:58px;height:58px;border-radius:50%;background:#25D366;color:#052E14;display:grid;place-items:center;box-shadow:0 12px 34px #00000047;transition:transform .25s}
+.wa{position:fixed;right:20px;bottom:84px;z-index:80;width:58px;height:58px;border-radius:50%;background:#25D366;color:#052E14;display:grid;place-items:center;box-shadow:0 12px 34px #00000047;transition:transform .25s}
 .wa:hover{transform:scale(1.08)}
 .wa svg{width:28px;height:28px}
+/* Нижняя полоса записи с бегущим ободком */
+.book{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:70;
+  width:min(520px,calc(100vw - 28px));padding:2px;border-radius:999px;overflow:hidden;isolation:isolate;
+  box-shadow:0 6px 24px ${p.mode==='dark'?'#00000073':'#00000024'};
+  opacity:0;pointer-events:none;transition:opacity .3s ease}
+.book.on{opacity:1;pointer-events:auto}
+.book:before{content:'';position:absolute;left:-50%;top:-300%;width:200%;height:700%;
+  background:conic-gradient(from 0deg,${p.g1},${p.g2},${p.ac},${p.g1});
+  animation:ring 4.5s linear infinite;z-index:-1}
+@keyframes ring{to{transform:rotate(360deg)}}
+.book-in{display:flex;align-items:center;gap:12px;background:var(--surf);border-radius:999px;padding:10px 10px 10px 20px}
+.book-t{flex:1;font-size:15px;font-weight:600}
+.book-s{font-size:12.5px;color:var(--mu);font-weight:400;display:block}
+.book-go{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--ac);color:var(--on);
+  display:grid;place-items:center;font-size:16px;font-weight:700}
+
 .bar{position:fixed;top:0;left:0;height:2.5px;background:linear-gradient(90deg,var(--g1),var(--g2));z-index:120;width:0}
 
 .rows{border-top:1px solid var(--hair)}
@@ -393,6 +417,32 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
   background-image:linear-gradient(${p.mode==='dark'?'#FFFFFF14':'#0000000F'} 1px,transparent 1px),linear-gradient(90deg,${p.mode==='dark'?'#FFFFFF14':'#0000000F'} 1px,transparent 1px);
   background-size:72px 72px;transform:rotateX(74deg);transform-origin:bottom;
   -webkit-mask-image:linear-gradient(transparent,#000 60%);mask-image:linear-gradient(transparent,#000 60%)}
+/* заголовок раскрывается построчно */
+.lineup{display:block;overflow:hidden}
+.lineup>i{display:block;font-style:normal;transform:translateY(100%);opacity:0;
+  transition:transform 1s cubic-bezier(.16,1,.3,1),opacity .7s ease;transition-delay:var(--ld,0ms)}
+.lineup.on>i{transform:none;opacity:1}
+
+/* блок прилипает, содержимое сменяется */
+.stack{position:relative}
+.stack-pin{position:sticky;top:0;height:100vh;display:grid;place-items:center;overflow:hidden}
+.stack-item{position:absolute;inset:0;display:grid;place-items:center;padding:0 24px;text-align:center;
+  opacity:0;transform:scale(.94);transition:opacity .5s ease,transform .5s ease}
+.stack-item.on{opacity:1;transform:none}
+.stack-item h3{font-size:clamp(26px,4vw,44px);margin-bottom:16px}
+.stack-item p{font-size:clamp(16px,1.6vw,20px);color:var(--mu);max-width:52ch;margin:0 auto}
+.stack-num{font-size:12px;letter-spacing:.2em;color:var(--ac);margin-bottom:18px;display:block}
+.stack-dots{position:absolute;right:24px;top:50%;transform:translateY(-50%);display:grid;gap:8px}
+.stack-dots i{width:6px;height:6px;border-radius:50%;background:var(--hair);transition:background .3s,transform .3s}
+.stack-dots i.on{background:var(--ac);transform:scale(1.5)}
+
+/* строка, которая едет вбок по мере прокрутки */
+.drift{will-change:transform}
+
+/* линия, растущая при появлении */
+.growline{height:2px;background:var(--ac);width:0;transition:width 1.1s cubic-bezier(.16,1,.3,1)}
+.growline.on{width:100%}
+
 .tilt{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.3,1)}
 .wr{display:inline-block;overflow:hidden;vertical-align:top}
 .wr i{display:inline-block;font-style:normal;transform:translateY(105%);opacity:0;
@@ -434,6 +484,12 @@ ${MOTION[dna.m]==='words'   ? '.rv{transform:translateY(16px)}' : ''}
  .rv{opacity:1;transform:none;clip-path:none}
  .wr i{transform:none;opacity:1}
  .rules,.netgrid{display:none}
+ .book:before{animation:none;background:var(--ac)}
+ .lineup>i{transform:none;opacity:1}
+ .stack-pin{position:static;height:auto}
+ .stack-item{position:static;opacity:1;transform:none;padding:32px 0}
+ .stack-dots{display:none}
+ .growline{width:100%}
  html{scroll-behavior:auto}
 }`;
 }
@@ -682,8 +738,27 @@ function aboutBlock(d, dna){
     </div></div></section>`;
 }
 
-function processBlock(d){
+function processBlock(d, dna){
   if (!d.process || !d.process.length) return '';
+
+  // Липкий блок: экран останавливается, шаги сменяют друг друга.
+  // Включаем, только если шагов хотя бы три — иначе смысла нет.
+  if (dna && dna.stack && d.process.length >= 3) {
+    const items = d.process.map(function(s, i){
+      return `<div class="stack-item" data-si="${i}">
+        <div><span class="stack-num">Шаг ${i+1} из ${d.process.length}</span>
+        <h3>${esc(s.name)}</h3><p>${esc(s.text)}</p></div></div>`;
+    }).join('');
+    const dots = d.process.map(function(_, i){ return `<i data-sd="${i}"></i>`; }).join('');
+    return `<section class="s line stack" style="height:${(d.process.length + 1) * 100}vh">
+      <div class="stack-pin">
+        <div class="w" style="text-align:center">
+          <div class="eyebrow rv" style="justify-content:center;margin-bottom:36px">${esc(d.processTitle||'Как мы работаем')}</div>
+        </div>
+        ${items}
+        <div class="stack-dots">${dots}</div>
+      </div></section>`;
+  }
   return `<section class="s line"><div class="w"><div class="g g2" style="gap:clamp(30px,5vw,70px);align-items:start">
     <div class="sticky"><div class="eyebrow rv">Как это устроено</div><h2 class="rv" style="--d:60ms">${esc(d.processTitle||'Как мы работаем')}</h2></div>
     <div>${d.process.map(function(s,i){
@@ -855,6 +930,42 @@ if(!R && nums.length){
   for(var n=0;n<nums.length;n++) nio.observe(nums[n]);
 }
 
+/* липкий блок: шаги сменяются по мере прокрутки */
+var stack=document.querySelector('.stack');
+if(stack && !R){
+  var items=stack.querySelectorAll('.stack-item'), dots=stack.querySelectorAll('.stack-dots i');
+  var onStack=function(){
+    var b=stack.getBoundingClientRect(), h=stack.offsetHeight-window.innerHeight;
+    if(h<=0) return;
+    var p=Math.min(1,Math.max(0,(-b.top)/h));
+    var idx=Math.min(items.length-1,Math.floor(p*items.length));
+    for(var i=0;i<items.length;i++){
+      if(i===idx) items[i].classList.add('on'); else items[i].classList.remove('on');
+      if(dots[i]){ if(i===idx) dots[i].classList.add('on'); else dots[i].classList.remove('on'); }
+    }
+  };
+  onStack(); window.addEventListener('scroll',onStack,{passive:true});
+  window.addEventListener('resize',onStack);
+} else if(stack){
+  var all=stack.querySelectorAll('.stack-item');
+  for(var q=0;q<all.length;q++) all[q].classList.add('on');
+}
+
+/* линии, растущие при появлении */
+var grows=document.querySelectorAll('.growline');
+if(grows.length){
+  if(R){for(var g=0;g<grows.length;g++)grows[g].classList.add('on');}
+  else{var gio=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');gio.unobserve(e.target);}})},{threshold:.5});
+  for(var g2=0;g2<grows.length;g2++)gio.observe(grows[g2]);}
+}
+
+/* полоса записи появляется после первого экрана */
+var book=document.getElementById('book');
+if(book){
+  var onBook=function(){ book.classList.toggle('on',(window.scrollY||0)>window.innerHeight*0.7); };
+  onBook(); window.addEventListener('scroll',onBook,{passive:true});
+}
+
 var nav=document.querySelector('.nav'),bar=document.querySelector('.bar');
 function onScroll(){
   var y=window.scrollY||0;
@@ -912,7 +1023,7 @@ function render(data, dna, opts){
 
   const blocks = {
     stats: statsBlock(d), services: servicesBlock(d, dna), about: aboutBlock(d, dna),
-    process: processBlock(d), gallery: galleryBlock(d), reviews: reviewsBlock(d), faq: faqBlock(d),
+    process: processBlock(d, dna), gallery: galleryBlock(d), reviews: reviewsBlock(d), faq: faqBlock(d),
   };
 
   const body = dna.order.map(function(k){ return blocks[k] || ''; }).join('')
@@ -964,6 +1075,10 @@ ${body}
 <footer><div class="w" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
 <span>© ${new Date().getFullYear()} ${esc(d.name)}${d.city ? ', ' + esc(d.city) : ''}</span>
 ${o.standalone ? '' : `<span>Сведения на странице размещены владельцем бизнеса. Сайт собран в WeDesign · ${esc(dnaCode(dna))}</span>`}</div></footer>
+${(safeTel(d.phone) || safeWa(d.whatsapp)) ? `<div class="book" id="book"><div class="book-in">
+  <span class="book-t">${esc(d.ctaText || 'Записаться')}<span class="book-s" data-open-badge>Часы работы</span></span>
+  <a class="book-go" href="${safeWa(d.whatsapp) ? 'https://wa.me/' + esc(safeWa(d.whatsapp)) : 'tel:' + esc(safeTel(d.phone))}" ${safeWa(d.whatsapp) ? 'target="_blank" rel="noopener"' : ''} aria-label="Связаться">&#8599;</a>
+</div></div>` : ''}
 ${safeWa(d.whatsapp)?`<a class="wa" href="https://wa.me/${esc(safeWa(d.whatsapp))}" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1-1.5-.6-3.4-1.7-4.9-3.8-.6-.8-1-1.7-1.1-2.5-.1-.8.2-1.5.6-1.9.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.4.7 1 1.3 1.6 1.8.6.4 1.1.6 1.3.7.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.3.1.2.1.6-.1 1.1Z"/></svg></a>`:''}
 ${wm}
 ${scripts(h)}

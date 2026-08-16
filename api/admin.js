@@ -46,6 +46,7 @@ const handler = async (req, res) => {
     return L.send(res, 200, {
       ok: true,
       orders,
+      siteDomain: L.siteDomain(),
       plans: L.plans(),
       kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
       storage: L.hasKV ? 'redis' : 'память (данные пропадут — подключите Upstash)',
@@ -106,6 +107,7 @@ const handler = async (req, res) => {
     }
 
     order.status = 'paid';
+    order.siteUrl = L.siteUrl(order.slug);
     order.paidConfirmedAt = Date.now();
     order.note = '';
     await L.store.srem('wd:amounts', String(order.amount));

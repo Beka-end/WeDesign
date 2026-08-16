@@ -621,7 +621,8 @@
     $('btnDownload').href = '/api/download?code=' + encodeURIComponent(data.code);
 
     if (data.publicUrl) {
-      var url = location.origin + data.publicUrl;
+      // Адрес может прийти полным (свой домен) или коротким (общий адрес).
+      var url = data.publicUrl.indexOf('http') === 0 ? data.publicUrl : location.origin + data.publicUrl;
       $('doneUrl').textContent = url;
       $('doneUrl').href = url;
       $('btnOpenSite').href = url;

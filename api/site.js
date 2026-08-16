@@ -5,7 +5,18 @@ const R = require('./_render');
 
 const handler = async (req, res) => {
   const url = new URL(req.url, 'http://x');
-  const slug = L.clean(url.searchParams.get('slug'), 60).toLowerCase();
+  let slug = L.clean(url.searchParams.get('slug'), 60).toLowerCase();
+
+  // Запасной разбор: если правило переадресации не сработало,
+  // достаём название из самого адреса вида barber-loft.домен.
+  if (!slug) {
+    const host = String(req.headers.host || '').toLowerCase();
+    const domain = L.siteDomain();
+    if (domain && host.endsWith('.' + domain)) {
+      const sub = host.slice(0, -(domain.length + 1));
+      if (sub && sub !== 'www' && sub.indexOf('.') < 0) slug = L.clean(sub, 60);
+    }
+  }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
