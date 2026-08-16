@@ -78,13 +78,17 @@ const MOTION  = ['up','mask','stagger','scale','words'];
 // Осталась только структурная графика — линии и сетка.
 const DEPTH   = ['rule','grid3d','none','none'];
 const SHAPE   = [0, 4, 12, 20, 28, 999];
+
+// Как выровнена страница. «Всё по центру» — главный признак машинной вёрстки,
+// поэтому центр здесь лишь один вариант из четырёх.
+const ALIGN   = ['left', 'left', 'offset', 'center'];
 const NAVS    = ['pill', 'plain', 'rule'];
 const SECTIONS = ['stats','services','about','process','gallery','reviews','faq'];
 
 // Варианты раскладки внутри блоков — от них зависит, как выглядит сайт,
 // а не только какого он цвета.
 const LAY_SERVICES = ['cards', 'rows', 'numbered', 'price-list'];
-const LAY_ABOUT    = ['split', 'centered', 'quote', 'wide'];
+const LAY_ABOUT    = ['split', 'editorial', 'quote', 'overlap', 'centered', 'wide'];
 const LAY_HOURS    = ['table', 'grid', 'compact'];
 
 const DAYS = [
@@ -169,6 +173,7 @@ function makeDNA(hint){
     stack: rnd(2) === 1,
     para: rnd(4) > 0,
     r: rnd(SHAPE.length),
+    al: rnd(ALIGN.length),
     nv: rnd(NAVS.length),
     ls: rnd(LAY_SERVICES.length),
     la: rnd(LAY_ABOUT.length),
@@ -181,7 +186,7 @@ function makeDNA(hint){
 }
 
 function dnaKey(d){
-  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,d.dp,+d.tilt,+d.para,+d.stack,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
+  return [d.p,d.f,d.h,d.m,d.r,d.nv,d.ls,d.la,d.lh,d.dp,d.al,+d.tilt,+d.para,+d.stack,+d.grain,+d.mesh,+d.wide,d.order.join('')].join('-');
 }
 function dnaCode(d){
   return 'DNA-' + crypto.createHash('sha256').update(dnaKey(d)).digest('hex').slice(0,6).toUpperCase();
@@ -234,7 +239,9 @@ function css(dna, p, f){
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:'${f.b}',system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.6;letter-spacing:-.006em;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{max-width:100%;display:block}
-a{color:inherit;text-decoration:none}
+a{color:inherit;text-decoration:none;text-underline-offset:.16em;text-decoration-thickness:1px}
+p a{text-decoration:underline;text-decoration-color:${p.ac}59}
+p a:hover{text-decoration-color:${p.ac}}
 button{font:inherit}
 .w{max-width:var(--maxw);margin:0 auto;padding:0 24px;position:relative;z-index:2}
 .w.n{max-width:820px}
@@ -340,7 +347,7 @@ ${NAVS[dna.nv]==='rule' ? '.links a{border-radius:0;border-bottom:1.5px solid tr
 .pill[data-open="0"]:before{animation:none}
 @keyframes pulse{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
 
-.big-link{display:block;font-family:'${f.d}',serif;font-weight:${f.dw};font-size:clamp(22px,3.2vw,38px);letter-spacing:${f.s};padding:20px 0;border-bottom:1px solid var(--hair);transition:padding-left .3s,color .3s}
+.big-link{text-underline-offset:.18em;text-decoration-thickness:1px;display:block;font-family:'${f.d}',serif;font-weight:${f.dw};font-size:clamp(22px,3.2vw,38px);letter-spacing:${f.s};padding:20px 0;border-bottom:1px solid var(--hair);transition:padding-left .3s,color .3s}
 .big-link:hover{padding-left:16px;color:var(--ac)}
 
 .cta{border-radius:var(--r);padding:clamp(40px,6vw,86px);position:relative;overflow:hidden;background:linear-gradient(120deg,var(--g1),var(--g2));color:#fff;text-align:center}
@@ -442,6 +449,43 @@ footer{padding:44px 0;border-top:1px solid var(--hair);color:var(--mu);font-size
 /* линия, растущая при появлении */
 .growline{height:2px;background:var(--ac);width:0;transition:width 1.1s cubic-bezier(.16,1,.3,1)}
 .growline.on{width:100%}
+
+/* ——— контраст размеров ———
+   Машинная вёрстка держит всё в диапазоне 16–24px. Ручная разводит края:
+   подписи 11px с разрядкой, заголовки крупные, среднего почти нет. */
+.head .eyebrow{margin-bottom:clamp(10px,1.4vw,18px)}
+.lead{font-size:clamp(17px,1.65vw,20.5px);line-height:1.55}
+.card p,.srow p,.snum p,.steps p{font-size:15px;line-height:1.55}
+.idx{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.16em;opacity:.5}
+.foot,.foot *{font-size:13px}
+.price{font-weight:700;letter-spacing:-.02em}
+
+/* ——— типографика ——— */
+/* Цифры одной ширины: цены и часы не пляшут в столбце */
+.price,.stat b,.hrs td,.hcell b,.hline b,.pitem-price,.srow-price{font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1}
+/* Крупный текст ужимается сильнее мелкого — так делают вручную */
+h1{font-feature-settings:'kern' 1,'liga' 1}
+/* Висячая пунктуация у цитат */
+.bigquote{text-indent:-.42em}
+/* Мелкие подписи: не «уменьшенный текст», а другой приём */
+.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600}
+
+/* ——— редакторские блоки ——— */
+/* Заголовок и текст в разных колонках разной ширины */
+.ed{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(24px,5vw,80px);align-items:start}
+.ed-side{position:sticky;top:96px}
+/* Крупная цифра, вынесенная на поле */
+.hang{display:grid;grid-template-columns:auto 1fr;gap:clamp(16px,3vw,36px);align-items:baseline}
+.hang em{font-style:normal;font-family:'${f.d}',serif;font-weight:${f.dw};
+  font-size:clamp(44px,7vw,104px);line-height:.82;letter-spacing:-.05em;color:${p.ac}2E}
+/* Текст, заходящий на цветную плашку */
+.overlap{position:relative;padding:clamp(28px,5vw,64px) 0}
+.overlap-bg{position:absolute;right:0;top:0;bottom:0;width:min(46%,520px);background:${p.ac}0F;border-radius:var(--r)}
+.overlap-in{position:relative;z-index:1;max-width:min(64ch,74%)}
+/* Тонкая линейка с номером на поле */
+.numrule{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;
+  padding-top:14px;border-top:1px solid var(--hair);margin-bottom:clamp(20px,3vw,34px)}
+.numrule span{font-family:ui-monospace,monospace;font-size:11.5px;letter-spacing:.14em;color:var(--mu)}
 
 .tilt{transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.7,.3,1)}
 .wr{display:inline-block;overflow:hidden;vertical-align:top}
@@ -565,6 +609,11 @@ function hero(dna, d){
   const pill = '<span class="pill" data-open-badge>Часы работы</span>';
   const pad = 'padding:clamp(130px,17vw,210px) 0 clamp(70px,9vw,120px)';
   const dep = depth(dna);
+  const A = ALIGN[dna.al];
+  // Смещение и ширина колонки: центр — лишь один из вариантов
+  const heroCol = A === 'center' ? 'max-width:820px;margin:0 auto;text-align:center'
+    : A === 'offset' ? 'max-width:820px;margin-left:clamp(0px,10vw,150px)'
+    : 'max-width:min(880px,92%)';
   const H1 = words(d.headline, dna);
 
   if (kind === 'mesh')
@@ -607,7 +656,7 @@ function hero(dna, d){
       <div class="rv" style="--d:300ms;margin-top:30px">${pill}</div></div></header>`;
 
   if (kind === 'rule')
-    return `<header style="${pad};position:relative">${dep}<div class="w">
+    return `<header style="${pad};position:relative">${dep}<div class="w"><div style="${heroCol}">
       ${eyebrow}<h1 class="rv" style="--d:60ms;max-width:15ch">${H1}</h1>
       <div style="height:1px;background:var(--hair);margin:38px 0"></div>
       <div class="g g2" style="align-items:start">
@@ -664,8 +713,25 @@ function statsBlock(d){
 
 function servicesBlock(d, dna){
   if (!d.services || !d.services.length) return '';
+  const n = d.services.length;
   const head = `<div class="head"><div class="eyebrow rv">Услуги</div><h2 class="rv" style="--d:60ms">${esc(d.servicesTitle||'Что мы делаем')}</h2></div>`;
-  const kind = LAY_SERVICES[dna ? dna.ls : 0];
+
+  // Раскладка подстраивается под количество. Три карточки в ряд при двух
+  // услугах — типичная машинная ошибка: сетка есть, а заполнять нечем.
+  let kind = LAY_SERVICES[dna ? dna.ls : 0];
+  if (n <= 2) kind = 'wide';          // две услуги — крупно, без сетки
+  else if (n >= 6) kind = 'price-list'; // много — списком, иначе каша
+
+  // Две услуги: каждая занимает пол-экрана и дышит
+  if (kind === 'wide')
+    return `<section class="s tint" id="services"><div class="w">${head}
+      <div class="g g2" style="gap:clamp(24px,5vw,72px)">${d.services.map(function(s,i){
+        return `<div class="rv" style="--d:${i*90}ms">
+          <div class="numrule"><span>${String(i+1).padStart(2,'0')}</span><i></i></div>
+          <h3 style="font-size:clamp(21px,2.6vw,30px);margin-bottom:10px">${esc(s.name)}</h3>
+          <p style="color:var(--mu);font-size:16.5px;margin:0 0 14px">${esc(s.text)}</p>
+          ${s.price?`<div class="price grad" style="font-size:21px">${esc(s.price)}</div>`:''}</div>`;
+      }).join('')}</div></div></section>`;
 
   // Карточки в сетке
   if (kind === 'cards')
@@ -722,6 +788,27 @@ function aboutBlock(d, dna){
     return `<section class="s line" id="about"><div class="w" style="text-align:center;max-width:760px">
       <div class="eyebrow rv">О нас</div><h2 class="rv" style="--d:60ms">${esc(d.aboutTitle||'Кто мы')}</h2>
       <p class="lead rv" style="--d:140ms;margin:0 auto">${esc(d.about)}</p></div></section>`;
+
+  // Заголовок в узкой колонке слева, текст в широкой справа
+  if (kind === 'editorial')
+    return `<section class="s line" id="about"><div class="w"><div class="ed">
+      <div class="ed-side">
+        <div class="eyebrow rv">О нас</div>
+        <h2 class="rv" style="--d:60ms;font-size:clamp(24px,3vw,38px)">${esc(d.aboutTitle||'Кто мы')}</h2>
+      </div>
+      <div class="rv" style="--d:140ms">
+        <p class="lead" style="margin-bottom:0">${esc(d.about)}</p>
+      </div></div></div></section>`;
+
+  // Текст заходит на цветную плашку — приём из печатной вёрстки
+  if (kind === 'overlap')
+    return `<section class="s line" id="about"><div class="w"><div class="overlap">
+      <div class="overlap-bg"></div>
+      <div class="overlap-in">
+        <div class="eyebrow rv">О нас</div>
+        <h2 class="rv" style="--d:60ms">${esc(d.aboutTitle||'Кто мы')}</h2>
+        <p class="lead rv" style="--d:140ms;margin-bottom:0">${esc(d.about)}</p>
+      </div></div></div></section>`;
 
   if (kind === 'quote')
     return `<section class="s line" id="about"><div class="w" style="max-width:900px">
@@ -788,8 +875,23 @@ function reviewsBlock(d){
     }).join('')}</div></div></section>`;
 }
 
-function faqBlock(d){
+function faqBlock(d, dna){
   if (!d.faq || !d.faq.length) return '';
+
+  // Короткие ответы не прячем под раскрывашку — это лишний клик
+  // и признак вёрстки «по шаблону». Показываем сразу, двумя колонками.
+  const short = d.faq.every(function(f){ return String(f.a || '').length < 120; });
+  if (short && d.faq.length >= 2)
+    return `<section class="s line" id="faq"><div class="w">
+      <div class="head"><div class="eyebrow rv">Вопросы</div>
+      <h2 class="rv" style="--d:60ms">${esc(d.faqTitle||'Коротко о главном')}</h2></div>
+      <div class="g g2" style="gap:clamp(20px,3vw,52px) clamp(24px,5vw,72px)">
+      ${d.faq.map(function(f,i){
+        return `<div class="rv" style="--d:${i*70}ms">
+          <div class="numrule" style="margin-bottom:10px"><span>${String(i+1).padStart(2,'0')}</span><i></i></div>
+          <h3 style="margin-bottom:7px">${esc(f.q)}</h3>
+          <p style="color:var(--mu);margin:0;font-size:15.5px">${esc(f.a)}</p></div>`;
+      }).join('')}</div></div></section>`;
   return `<section class="s line" id="faq"><div class="w n">
     <div class="head"><div class="eyebrow rv">Вопросы</div><h2 class="rv" style="--d:60ms">Коротко о главном</h2></div>
     <div class="rv" style="--d:120ms">${d.faq.map(function(f){
@@ -1022,7 +1124,7 @@ function render(data, dna, opts){
   });
 
   const blocks = {
-    stats: statsBlock(d), services: servicesBlock(d, dna), about: aboutBlock(d, dna),
+    stats: statsBlock(d, dna), services: servicesBlock(d, dna), about: aboutBlock(d, dna),
     process: processBlock(d, dna), gallery: galleryBlock(d), reviews: reviewsBlock(d), faq: faqBlock(d),
   };
 
