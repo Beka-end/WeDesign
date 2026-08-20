@@ -17,6 +17,45 @@ const handler = async (req, res) => {
   const accId = L.clean(body.termsId, 20);
   const chosen = L.plan(L.clean(body.plan, 10));
 
+  // Продление: код существующего заказа вместо нового черновика.
+  const renewCode = L.clean(body.renew, 12).toUpperCase();
+  if (renewCode) {
+    const old = await L.getJSON(`wd:order:${renewCode}`);
+    if (!old || !old.slug) return L.fail(res, 404, 'Заказ не найден или сайт ещё не публиковался');
+
+    const price = L.renewPrice();
+    const windowMin = L.num('PAY_WINDOW_MIN', 90);
+    let amount = 0;
+    for (let i = 0; i < 60; i++) {
+      const tryAmount = price + 1 + Math.floor(Math.random() * 499);
+      const fresh = await L.store.sadd('wd:amounts', String(tryAmount));
+      if (fresh === 1) { amount = tryAmount; break; }
+    }
+    if (!amount) return L.fail(res, 503, 'Сейчас все суммы заняты. Попробуйте через час');
+
+    old.renewAmount = amount;
+    old.renewExpires = Date.now() + windowMin * 60000;
+    old.status = 'awaiting_payment';
+    old.amount = amount;
+    old.expiresAt = old.renewExpires;
+    old.claim = null;
+    old.risk = [];
+    await L.setJSON(`wd:order:${renewCode}`, old, 400 * L.DAY);
+
+    return L.send(res, 200, {
+      ok: true,
+      code: old.code,
+      amount,
+      renew: true,
+      planTitle: 'Продление размещения',
+      expiresAt: old.expiresAt,
+      business: old.business,
+      status: old.status,
+      kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
+      support: L.contacts(),
+    });
+  }
+
   // Имя при заказе не спрашиваем: платёж опознаётся по уникальной сумме,
   // а имя плательщика придёт вместе с чеком. Телефон — только для связи.
   if (!draftId) return L.fail(res, 400, 'Сначала соберите сайт');

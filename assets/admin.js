@@ -106,7 +106,8 @@
       $('kaspiOpen').href = kaspiUrl;
       var waiting = orders.filter(function (o) { return o.status === 'claimed'; }).length;
       var pr = (data.plans || []).map(function (p) { return p.title + ' ' + tenge(p.price) + ' ₸'; }).join(' · ');
-      $('meta').textContent = pr + ' · хранилище: ' + data.storage + ' · ждут проверки: ' + waiting;
+      $('meta').textContent = pr + ' · хранилище: ' + data.storage +
+        ' · ждут проверки: ' + waiting + ' · истекают: ' + soon + ' · истекли: ' + dead;
       render();
     } catch (e) {
       alert(e.message);
@@ -149,7 +150,8 @@
         '</div>' +
         '<div class="kv">' +
           '<div><span>Сумма к оплате</span><b class="mono">' + tenge(o.amount) + ' ₸</b></div>' +
-          '<div><span>Тариф</span><b>' + esc(o.planTitle || 'Готовый сайт') +
+          term(o) +
+          '<div><span>Тариф</span><b>' + esc(o.planTitle || 'Сайт под ключ') +
             (o.plan === 'site' ? ' <span style="color:var(--ac);font-size:12px">— публикуем</span>' : ' <span style="color:var(--mu);font-size:12px">— только файл</span>') + '</b></div>' +
           '<div><span>Телефон для связи</span><b><a href="tel:' + esc(String(o.contactPhone).replace(/[^0-9+]/g, '')) +
             '" style="color:var(--ac)">' + esc(o.contactPhone) + '</a></b></div>' +
@@ -187,6 +189,15 @@
               ) + '">Отправить ссылку в WhatsApp</a>'
             : '') +
           (o.status !== 'paid' ? '<button class="btn btn-sm" data-act="confirm" data-code="' + o.code + '">Платёж получен' + (o.plan === 'site' ? ', опубликовать' : ', выдать файл') + '</button>' : '') +
+          (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="extend" data-code="' + o.code + '">Продлить на месяц</button>' : '') +
+          (o.status === 'paid' && o.paidUntil > Date.now() ? '<button class="btn btn-ghost btn-sm" data-act="suspend" data-code="' + o.code + '">Приостановить</button>' : '') +
+          (o.paidUntil && o.paidUntil - Date.now() < 8 * 86400000 && o.contactPhone
+            ? '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/' +
+              esc(String(o.contactPhone).replace(/\D/g, '')) + '?text=' +
+              encodeURIComponent('Здравствуйте! Напоминаем: размещение сайта ' + (o.siteUrl || '') +
+                ' оплачено до ' + new Date(o.paidUntil).toLocaleDateString('ru-RU') +
+                '. Чтобы продлить, откройте раздел «Мой заказ» и введите код ' + o.code + '.') +
+              '">Напомнить о продлении</a>' : '') +
           (o.status === 'paid' ? '<button class="btn btn-ghost btn-sm" data-act="revoke" data-code="' + o.code + '">Отозвать</button>' : '') +
           (o.status !== 'paid' && o.status !== 'rejected' ? '<button class="btn btn-ghost btn-sm" data-act="reject" data-code="' + o.code + '">Платежа нет</button>' : '') +
         '</div>' +
@@ -195,6 +206,18 @@
 
   // Что мы знаем о человеке за этим заказом. Регистрации нет — поэтому
   // единственная настоящая привязка к личности приходит из банка.
+  // Сколько дней осталось до конца оплаченного размещения
+  function term(o) {
+    if (!o.paidUntil) return '';
+    var left = Math.ceil((o.paidUntil - Date.now()) / 86400000);
+    var col = left < 0 ? 'var(--danger)' : left <= 7 ? 'var(--amber)' : 'var(--ok)';
+    var txt = left < 0 ? 'истёк ' + Math.abs(left) + ' дн. назад'
+      : left === 0 ? 'истекает сегодня'
+      : 'осталось ' + left + ' дн.';
+    return '<div><span>Размещение</span><b style="font-size:13px;color:' + col + '">' + txt +
+      '<br><span style="color:var(--mu);font-weight:400">до ' + new Date(o.paidUntil).toLocaleDateString('ru-RU') + '</span></b></div>';
+  }
+
   function chain(o) {
     if (o.status !== 'claimed' && o.status !== 'paid') return '';
     var c = o.claim || {};
@@ -238,6 +261,12 @@
       }
       if (action === 'confirm') {
         if (!confirm('Вы своими глазами увидели этот платёж в Kaspi?')) return;
+      }
+      if (action === 'extend') {
+        if (!confirm('Продлить размещение на месяц? Делайте это, только если платёж получен.')) return;
+      }
+      if (action === 'suspend') {
+        if (!confirm('Приостановить сайт? Он закроется, но заказ и данные останутся — клиент сможет продлить.')) return;
       }
       var note = '';
       if (action === 'reject' || action === 'revoke') {

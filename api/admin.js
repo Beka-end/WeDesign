@@ -47,6 +47,8 @@ const handler = async (req, res) => {
       ok: true,
       orders,
       siteDomain: L.siteDomain(),
+      periodDays: L.periodDays(),
+      renewPrice: L.renewPrice(),
       plans: L.plans(),
       kaspiUrl: process.env.KASPI_URL || 'https://pay.kaspi.kz/pay/cwevqlzj',
       storage: L.hasKV ? 'redis' : 'память (данные пропадут — подключите Upstash)',
@@ -106,6 +108,13 @@ const handler = async (req, res) => {
       await L.setJSON(`wd:site:${slug}`, { code: order.code, draftId: order.draftId }, 400 * L.DAY);
     }
 
+    // Каждое подтверждение добавляет период. Если срок ещё не вышел —
+    // прибавляем к нему, чтобы человек не терял оплаченные дни.
+    const add = L.periodDays() * L.DAY * 1000;
+    const from = order.paidUntil && order.paidUntil > Date.now() ? order.paidUntil : Date.now();
+    order.paidUntil = from + add;
+    order.periods = (order.periods || 0) + 1;
+
     order.status = 'paid';
     order.siteUrl = L.siteUrl(order.slug);
     order.paidConfirmedAt = Date.now();
@@ -122,6 +131,29 @@ const handler = async (req, res) => {
     await L.store.srem('wd:amounts', String(order.amount));
     if (order.claim && order.claim.receiptNo) await L.store.srem('wd:receipts', order.claim.receiptNo);
     await L.setJSON(`wd:order:${code}`, order, 120 * L.DAY);
+    return L.send(res, 200, { ok: true, order });
+  }
+
+  // Продлить вручную: когда клиент заплатил мимо формы.
+  if (action === 'extend') {
+    if (!order.slug) return L.fail(res, 400, 'Сайт ещё не публиковался');
+    const days = Math.min(400, Math.max(1, Number(body.days) || L.periodDays()));
+    const from = order.paidUntil && order.paidUntil > Date.now() ? order.paidUntil : Date.now();
+    order.paidUntil = from + days * L.DAY * 1000;
+    order.periods = (order.periods || 0) + 1;
+    order.status = 'paid';
+    order.note = '';
+    await L.setJSON(`wd:order:${code}`, order, 400 * L.DAY);
+    return L.send(res, 200, { ok: true, order });
+  }
+
+  // Приостановить: сайт закрывается, но заказ и данные остаются.
+  // Клиент сможет продлить и вернуть сайт.
+  if (action === 'suspend') {
+    // Минус секунда, чтобы проверка «срок вышел» сработала сразу.
+    order.paidUntil = Date.now() - 1000;
+    order.note = L.clean(body.note, 200) || 'Размещение приостановлено';
+    await L.setJSON(`wd:order:${code}`, order, 400 * L.DAY);
     return L.send(res, 200, { ok: true, order });
   }
 

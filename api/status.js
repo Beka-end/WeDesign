@@ -40,6 +40,14 @@ const handler = async (req, res) => {
   // Для тарифа «Готовый сайт» отдаём адрес опубликованной страницы.
   if (order.status === 'paid' && order.slug) out.publicUrl = L.siteUrl(order.slug);
 
+  // Срок размещения и цена продления
+  if (order.paidUntil) {
+    out.paidUntil = order.paidUntil;
+    out.daysLeft = Math.ceil((order.paidUntil - Date.now()) / (L.DAY * 1000));
+    out.expired = order.paidUntil < Date.now();
+    out.renewPrice = L.renewPrice();
+  }
+
   return L.send(res, 200, out);
 };
 

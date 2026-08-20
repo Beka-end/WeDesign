@@ -73,7 +73,10 @@ const handler = async (req, res) => {
       ADMIN_SECRET: Boolean(process.env.ADMIN_SECRET),
     },
     деньги: {
-      PRICE_KZT: process.env.PRICE_KZT || '9990 (по умолчанию)',
+      PRICE_SITE: process.env.PRICE_SITE || '9990 (по умолчанию)',
+      PRICE_RENEW: process.env.PRICE_RENEW || '4990 (по умолчанию)',
+      PERIOD_DAYS: process.env.PERIOD_DAYS || '30 (по умолчанию)',
+      SITE_DOMAIN: process.env.SITE_DOMAIN || 'не задан — сайты по /s/название',
       KASPI_URL: process.env.KASPI_URL || 'по умолчанию',
       LIMIT_GLOBAL_DAY: process.env.LIMIT_GLOBAL_DAY || '250 (по умолчанию)',
     },

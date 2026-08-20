@@ -24,6 +24,23 @@ const handler = async (req, res) => {
   const draft = site ? await L.getJSON(`wd:draft:${site.draftId}`) : null;
   const order = site ? await L.getJSON(`wd:order:${site.code}`) : null;
 
+  // Срок оплаченного размещения вышел — показываем заглушку, а не сайт.
+  if (site && order && order.status === 'paid' && order.paidUntil && order.paidUntil < Date.now()) {
+    res.statusCode = 402;
+    res.setHeader('Cache-Control', 'no-store');
+    return res.end(
+      `<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Размещение приостановлено</title></head>
+<body style="font:16px/1.6 system-ui;padding:56px 24px;max-width:520px;margin:0 auto;color:#14120F;background:#FBFAF7">
+<h1 style="font-size:26px;letter-spacing:-.03em;margin:0 0 12px">Размещение приостановлено</h1>
+<p style="color:#5A554C">Срок оплаченного размещения этого сайта истёк. Владелец может продлить его и вернуть сайт.</p>
+<p style="color:#5A554C">Если это ваш сайт — откройте главную и введите код заказа в разделе «Мой заказ».</p>
+<p><a href="/" style="color:#1B4DE4;font-weight:600">На главную</a></p></body></html>`
+    );
+  }
+
   if (!site || !draft || !order || order.status !== 'paid') {
     res.statusCode = 404;
     return res.end(

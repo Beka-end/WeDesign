@@ -265,6 +265,15 @@ mark,.hl{background:linear-gradient(transparent 62%,#C4522A26 62%);color:inherit
 .vs-list.good li:before{content:'✓';position:absolute;left:0;color:var(--ok)}
 .vs-list.good li{color:var(--ink)}
 
+/* ——— один тариф ——— */
+.price-one{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:var(--s7);
+  align-items:center;border:1px solid var(--line-2);border-radius:var(--r-card);
+  padding:var(--s7) var(--s6);background:var(--bg)}
+.price-one-main .t-price{font-size:48px;margin:var(--s2) 0 var(--s3)}
+.price-one-main .btn{width:100%;max-width:320px}
+.price-one-list{margin:0}
+.price-one-list li{padding:var(--s2) 0 var(--s2) var(--s5)}
+
 /* ——— тарифы ——— */
 .tariffs{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
 .tariff{border:1px solid var(--line);border-radius:var(--r-card);padding:var(--s5);display:flex;flex-direction:column;position:relative}
@@ -371,6 +380,13 @@ mark,.hl{background:linear-gradient(transparent 62%,#C4522A26 62%);color:inherit
 .live-act{display:flex;gap:var(--s2);flex-wrap:wrap}
 .filebox{border:1px solid var(--line);border-radius:var(--r-card);padding:var(--s5);margin:var(--s4) 0;display:flex;justify-content:space-between;gap:var(--s4);align-items:center;flex-wrap:wrap}
 .filebox b{font-size:15px}
+
+.term{border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:var(--r-card);
+  padding:var(--s4) var(--s5);margin:var(--s4) 0;display:flex;justify-content:space-between;
+  gap:var(--s4);align-items:center;flex-wrap:wrap}
+.term.warn{border-left-color:var(--warn)}
+.term.dead{border-left-color:var(--err)}
+.term b{font-size:15px}
 
 /* ——— мой заказ ——— */
 .check{display:grid;grid-template-columns:1fr 1fr;gap:var(--s7);align-items:start}

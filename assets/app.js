@@ -452,18 +452,8 @@
 
   /* ═══════════ выбор тарифа ═══════════ */
 
-  function chosenPlan() {
-    var el = document.querySelector('input[name="plan"]:checked');
-    return el ? el.value : 'site';
-  }
-
-  document.querySelectorAll('input[name="plan"]').forEach(function (r) {
-    r.addEventListener('change', function () {
-      document.querySelectorAll('.pick-opt').forEach(function (o) {
-        o.classList.toggle('on', o.contains(r) && r.checked ? true : o.querySelector('input').checked);
-      });
-    });
-  });
+  // Тариф один — выбирать нечего.
+  function chosenPlan() { return 'site'; }
 
   /* ═══════════ заказ и оплата ═══════════ */
 
@@ -634,6 +624,24 @@
       $('doneTitle').textContent = 'Ваш сайт готов';
       $('doneLead').textContent = 'Скачайте файл — это ваш сайт целиком. Разместить его можно бесплатно за пару минут, инструкция рядом с кнопкой.';
     }
+    // Срок размещения и продление
+    var tb = $('termBox');
+    if (data.daysLeft !== undefined) {
+      var left = data.daysLeft;
+      var till = new Date(data.paidUntil).toLocaleDateString('ru-RU');
+      var money = String(data.renewPrice || 4990).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      tb.className = 'term' + (left < 0 ? ' dead' : left <= 7 ? ' warn' : '');
+      $('termTitle').textContent = left < 0 ? 'Размещение приостановлено'
+        : left <= 7 ? 'Размещение скоро закончится'
+        : 'Размещение оплачено';
+      $('termText').textContent = left < 0
+        ? 'Срок истёк ' + till + '. Сайт закрыт, но всё сохранено — продлите, и он вернётся. ' + money + ' ₸ за месяц.'
+        : 'Оплачено до ' + till + ' — осталось ' + left + ' дн. Продление ' + money + ' ₸ за месяц.';
+      tb.hidden = false;
+    } else {
+      tb.hidden = true;
+    }
+
     $('doneNote').innerHTML =
       'Нужно поправить текст или добавить фотографии — ' +
       (support && support.whatsapp

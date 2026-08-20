@@ -419,14 +419,13 @@ function wrap(handler) {
 /* Диапазоны сумм не пересекаются: 4991–5489 и 9991–10489.              */
 /* ------------------------------------------------------------------ */
 
+// Тариф один: сайт под ключ. Файл отдаётся вместе с ним, но отдельно
+// не продаётся — то же самое любой ИИ выдаёт бесплатно.
+// Сколько дней размещения даёт один платёж и сколько стоит продление.
+function periodDays() { return num('PERIOD_DAYS', 30); }
+function renewPrice() { return num('PRICE_RENEW', 4990); }
+
 const PLANS = {
-  file: {
-    id: 'file',
-    title: 'Только файл',
-    envPrice: 'PRICE_FILE',
-    fallback: 4990,
-    short: 'скачиваете и размещаете сами',
-  },
   site: {
     id: 'site',
     title: 'Сайт под ключ',
@@ -442,7 +441,7 @@ function plan(id) {
 }
 
 function plans() {
-  return [plan('file'), plan('site')];
+  return [plan('site')];
 }
 
 /* ------------------------------------------------------------------ */
@@ -477,6 +476,8 @@ module.exports = {
   contacts,
   siteDomain,
   siteUrl,
+  periodDays,
+  renewPrice,
   plan,
   plans,
   wrap,
