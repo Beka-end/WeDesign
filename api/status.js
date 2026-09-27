@@ -40,6 +40,11 @@ const handler = async (req, res) => {
   // Для тарифа «Готовый сайт» отдаём адрес опубликованной страницы.
   if (order.status === 'paid' && order.slug) out.publicUrl = L.siteUrl(order.slug);
 
+  // Незакрытая бронь может быть как за первый платёж, так и за продление —
+  // в карточке оплаты это разные подписи.
+  out.renew = !!(order.renewAmount && order.amount === order.renewAmount && order.status !== 'paid');
+  out.periodDays = L.periodDays();
+
   // Срок размещения и цена продления
   if (order.paidUntil) {
     out.paidUntil = order.paidUntil;

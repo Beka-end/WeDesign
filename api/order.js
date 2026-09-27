@@ -47,6 +47,7 @@ const handler = async (req, res) => {
       code: old.code,
       amount,
       renew: true,
+      periodDays: L.periodDays(),
       planTitle: 'Продление размещения',
       expiresAt: old.expiresAt,
       business: old.business,

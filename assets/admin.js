@@ -91,6 +91,15 @@
   };
 
   function tenge(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+
+  // Сколько дней осталось до конца оплаченного размещения.
+  // null — размещения нет: заказ ещё не оплачивался или его отозвали.
+  // Пока идёт оплата продления статус снова «ждёт оплату», но размещение
+  // ещё живо — поэтому смотрим на срок, а не на статус.
+  function daysLeft(o) {
+    if (!o.paidUntil || o.status === 'rejected') return null;
+    return Math.ceil((o.paidUntil - Date.now()) / 86400000);
+  }
   function when(ts) { return ts ? new Date(ts).toLocaleString('ru-RU') : '—'; }
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -106,6 +115,17 @@
       $('kaspiOpen').href = kaspiUrl;
       var waiting = orders.filter(function (o) { return o.status === 'claimed'; }).length;
       var pr = (data.plans || []).map(function (p) { return p.title + ' ' + tenge(p.price) + ' ₸'; }).join(' · ');
+
+      // Сколько размещений на исходе и сколько уже закрылось. Правило то же,
+      // что в карточке заказа: неделя до конца — «истекают», минус — «истекли».
+      var soon = 0, dead = 0;
+      orders.forEach(function (o) {
+        var left = daysLeft(o);
+        if (left === null) return;
+        if (left < 0) dead++;
+        else if (left <= 7) soon++;
+      });
+
       $('meta').textContent = pr + ' · хранилище: ' + data.storage +
         ' · ждут проверки: ' + waiting + ' · истекают: ' + soon + ' · истекли: ' + dead;
       render();
@@ -114,9 +134,21 @@
     }
   }
 
+  // Фильтры «Истекают» и «Истекли» — не статусы заказа, а срок размещения:
+  // заказ оплачен, а месяц кончается или уже кончился.
+  function match(o) {
+    if (filter === 'all') return true;
+    if (filter === 'expiring' || filter === 'expired') {
+      var left = daysLeft(o);
+      if (left === null) return false;
+      return filter === 'expired' ? left < 0 : left >= 0 && left <= 7;
+    }
+    return o.status === filter;
+  }
+
   function render() {
     var list = $('list');
-    var shown = orders.filter(function (o) { return filter === 'all' || o.status === filter; });
+    var shown = orders.filter(match);
     if (!shown.length) {
       list.innerHTML = '<p class="micro">Здесь пока пусто. Как только клиент оформит заказ, он появится в этом списке.</p>';
       return;
@@ -208,8 +240,8 @@
   // единственная настоящая привязка к личности приходит из банка.
   // Сколько дней осталось до конца оплаченного размещения
   function term(o) {
-    if (!o.paidUntil) return '';
-    var left = Math.ceil((o.paidUntil - Date.now()) / 86400000);
+    var left = daysLeft(o);
+    if (left === null) return '';
     var col = left < 0 ? 'var(--danger)' : left <= 7 ? 'var(--amber)' : 'var(--ok)';
     var txt = left < 0 ? 'истёк ' + Math.abs(left) + ' дн. назад'
       : left === 0 ? 'истекает сегодня'

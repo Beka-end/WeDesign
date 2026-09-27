@@ -10,6 +10,7 @@
   var draftId = null;
   var order = null;
   var timerId = null;
+  var doneData = null;
 
   // Память браузера: чтобы человек не потерял сайт, закрыв вкладку.
   // В приватном режиме localStorage кидает ошибку — молча переживаем это.
@@ -174,6 +175,26 @@
     for (var j = 0; j < rv.length; j++) io.observe(rv[j]);
   }
 
+  /* ═══════════ нижняя полоска-подсказка ═══════════ */
+
+  // Появляется, когда первый экран уехал, а форма ввода ещё не на виду.
+  // Крестик закрывает её насовсем: навязываться второй раз некрасиво.
+  var ctaBar = $('ctaBar');
+  var ctaOff = STORE.get('ctabar') === 'off';
+
+  $('ctaBarX').addEventListener('click', function () {
+    ctaOff = true;
+    STORE.set('ctabar', 'off');
+    ctaBar.classList.remove('on');
+  });
+
+  function ctaCheck(y) {
+    if (ctaOff) return ctaBar.classList.remove('on');
+    var r = $('build').getBoundingClientRect();
+    var away = r.top > window.innerHeight || r.bottom < 0;
+    ctaBar.classList.toggle('on', y > window.innerHeight * 0.6 && away);
+  }
+
   var nav = document.querySelector('.nav');
   var bar = document.querySelector('.bar');
   function onScroll() {
@@ -181,6 +202,7 @@
     nav.classList.toggle('stuck', y > 24);
     var h = document.documentElement.scrollHeight - window.innerHeight;
     bar.style.width = (h > 0 ? (y / h) * 100 : 0) + '%';
+    ctaCheck(y);
   }
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -523,7 +545,9 @@
   function openPay(o) {
     order = o;
     $('payAmount').textContent = tenge(o.amount) + ' ₸';
-    if (o.planTitle) $('payPlan').textContent = 'Тариф «' + o.planTitle + '»';
+    if (o.renew) $('payPlan').textContent = 'Продление размещения'
+      + (o.periodDays ? ' на ' + o.periodDays + ' дн.' : '');
+    else if (o.planTitle) $('payPlan').textContent = 'Тариф «' + o.planTitle + '»';
     $('payCode').textContent = o.code;
     $('cAmount').value = o.amount;
     $('kaspiLink').href = o.kaspiUrl || 'https://pay.kaspi.kz/pay/cwevqlzj';
@@ -608,6 +632,7 @@
   /* ═══════════ готовый сайт ═══════════ */
 
   function showDone(data) {
+    doneData = data;
     $('btnDownload').href = '/api/download?code=' + encodeURIComponent(data.code);
 
     if (data.publicUrl) {
@@ -652,6 +677,48 @@
     $('done').hidden = false;
     $('done').scrollIntoView({ behavior: 'smooth' });
   }
+
+  /* ═══════════ ссылка на сайт и продление ═══════════ */
+
+  // Клиент чаще всего пришёл с телефона и ставит ссылку в Instagram.
+  // Выделять её пальцем неудобно — поэтому кнопка.
+  $('btnCopyUrl').addEventListener('click', function () {
+    var url = $('doneUrl').textContent;
+    var btn = this;
+    function done() {
+      btn.textContent = 'Скопирована';
+      setTimeout(function () { btn.textContent = 'Скопировать ссылку'; }, 1800);
+    }
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, done);
+    else done();
+  });
+
+  // Продление. Сервер бронирует новую уникальную сумму на тот же код заказа,
+  // дальше путь ровно такой же, как при первой оплате: Kaspi, потом чек.
+  // Модель здесь не вызывается и сайт не пересобирается — платим за месяц,
+  // а не за новую работу.
+  $('btnRenew').addEventListener('click', async function () {
+    var code = doneData && doneData.code;
+    if (!code) return;
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Бронирую сумму…';
+    try {
+      var made = await api('/api/order', { renew: code });
+      STORE.set('order', made.code);
+      openPay(made);
+      // Плашка срока не должна утверждать «оплачено до», пока идёт оплата.
+      $('termTitle').textContent = 'Сумма для продления забронирована';
+      $('termText').textContent = 'Оплатите ' + tenge(made.amount) + ' ₸ — ровно эту сумму, '
+        + 'она закреплена за вашим заказом. Форма ниже.';
+      $('pay').scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      show($('termText'), e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Продлить';
+    }
+  });
 
   /* ═══════════ статус заказа ═══════════ */
 
